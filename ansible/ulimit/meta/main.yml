@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  author: Maxime Hugues
+  role_name: ulimit
+  description: Set ulimit for HPC
+  license: Apache-2.0
+  company: Amazon Web Services
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Amazon
+      versions:
+        - 2
+    - name: EL
+      versions:
+        - 8
+        - 7
+    - name: Ubuntu
+      versions:
+        - focal
+        - bionic
+        - xenial
+
+  galaxy_tags:
+    - ulimit
+
+dependencies: []

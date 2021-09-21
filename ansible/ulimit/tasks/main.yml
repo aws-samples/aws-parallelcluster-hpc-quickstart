@@ -1,0 +1,51 @@
+---
+# tasks file for ulimit
+- name: Increase nproc
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: nproc
+    value: unlimited
+
+- name: Increase nproc
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: nproc
+    value: unlimited
+    dest: /etc/security/limits.d/20-nproc.conf
+
+- name: Increase memlock
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: memlock
+    value: unlimited
+
+- name: Increase stack
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: stack
+    value: unlimited
+
+- name: Increase nofile
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: nofile
+    value: 1048576
+
+- name: Increase cpu
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: cpu
+    value: unlimited
+
+- name: Increase rtprio
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: rtprio
+    value: unlimited

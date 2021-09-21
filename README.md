@@ -1,17 +1,22 @@
-## My Project
+# AWSome HPC
 
-TODO: Fill this README out!
+AWSome HPC provides various High Performance Computing (HPC) application samples to deploy and run on AWS.
+It is organized by folder:
 
-Be sure to:
+1. `apps` contains applications deployment scripts.
+1. `scripts/install` contains compilers, libraries and applications installation scripts.
 
-* Change the title in this README
-* Edit your repository description on GitHub
+## Applications
+
+The following applications are provided:
+
+- [LAMMPS](<apps/lammps/README.md>)
+- [WRF v4](<apps/wrf/README.md>)
 
 ## Security
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+See [CONTRIBUTING](<CONTRIBUTING.md#security-issue-notifications>) for more information.
 
 ## License
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
-
+This project is licensed under MIT-0, see the [LICENSE](<LICENSE>) file
