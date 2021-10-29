@@ -47,7 +47,7 @@ if [[ -z ${SSH_KEY_EXIST} ]]; then
         --output text > ~/.ssh/${SSH_KEY_NAME}
 
     chmod 400 ~/.ssh/${SSH_KEY_NAME}
-    echo "${SSH_KEY_NAME}" >> env_vars
+    echo "export SSH_KEY_NAME=${SSH_KEY_NAME}" >> env_vars
 else
     echo "[WARNING] SSH_KEY_NAME ${SSH_KEY_NAME} already exist"
 fi
@@ -66,7 +66,7 @@ if [[ -z ${VPC_ID} ]]; then
 fi
 
 if [[ ! -z $VPC_ID ]]; then
-    echo "${VPC_ID}" >> env_vars
+    echo "export VPC_ID=${VPC_ID}" >> env_vars
     echo "[INFO] VPC_ID = ${VPC_ID}"
 else
     echo "[ERROR] failed to retrieve VPC ID"
@@ -104,7 +104,7 @@ SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     | jq -r .[$(python3 -S -c "import random; print(random.randrange(${AZ_COUNT}))")]`
 
 if [[ ! -z $SUBNET_ID ]]; then
-    echo "${SUBNET_ID}" >> env_vars
+    echo "export SUBNET_ID=${SUBNET_ID}" >> env_vars
     echo "[INFO] SUBNET_ID = ${SUBNET_ID}"
 else
     echo "[ERROR] failed to retrieve SUBNET ID"
