@@ -154,16 +154,21 @@ pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 
 ## Run WRF v4
 
-In this section, you will go through the steps to run [test case(s) provided by NCAR](<https://www2.mmm.ucar.edu/wrf/users/special_code.html>) on AWS ParallelCluster.
+In this section, you will go through the steps to run [test case(s) provided by NCAR](<https://www2.mmm.ucar.edu/wrf/users/benchmark/benchdata_v422.html>) on AWS ParallelCluster.
 
 Once you are connected to the WRF cluster, you should navigate to the `/fsx` directory.
 Here are the steps:
 
-#### Download CONUS 12KM
+#### Retrieve CONUS 12KM
+
+Input data used for simulating the Weather Research and Forecasting (WRF) model are 12-km CONUS input.
+These are used to run the WRF executable (wrf.exe) to simulate atmospheric events that took place during the Pre-Thanksgiving Winter Storm of 2019.
+The model domain includes the entire Continental United States (CONUS), using 12-km grid spacing, which means that each grid point is 12x12 km.
+The full domain contains 425 x 300 grid points. After running the WRF model, post-processing will allow visualization of atmospheric variables available in the output (e.g., temperature, wind speed, pressure).
 
 ```bash
 cd /fsx
-curl -O https://www2.mmm.ucar.edu/wrf/src/non_compressed_12km.tar.gz
+curl -O https://www2.mmm.ucar.edu/wrf/OnLineTutorial/wrf_cloud/wrf_simulation_CONUS12km.tar.gz
 tar -xzf non_compressed_12km.tar.gz
 ```
 
@@ -193,12 +198,6 @@ cp /opt/wrf-omp/src/run/{\
 ```
 
 #### Run CONUS 12Km
-
-Change restart to .false. since the test case is not run from a checkpoint.
-
-```bash
-sed -i "s%restart[[:space:]]\+= .true.,%restart = .false.,%g" namelist.input
-```
 
 Create a slurm submission script
 
