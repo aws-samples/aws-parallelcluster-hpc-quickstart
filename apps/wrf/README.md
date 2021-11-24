@@ -169,13 +169,13 @@ The full domain contains 425 x 300 grid points. After running the WRF model, pos
 ```bash
 cd /fsx
 curl -O https://www2.mmm.ucar.edu/wrf/OnLineTutorial/wrf_cloud/wrf_simulation_CONUS12km.tar.gz
-tar -xzf non_compressed_12km.tar.gz
+tar -xzf wrf_simulation_CONUS12km.tar.gz
 ```
 
 #### Prepare the data
 
 ```bash
-cd non_compressed_12km
+cd /fsx/conus_12km
 
 cp /opt/wrf-omp/src/run/{\
         GENPARM.TBL,\
