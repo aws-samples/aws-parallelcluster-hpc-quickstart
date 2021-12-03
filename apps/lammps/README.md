@@ -84,6 +84,28 @@ The script will install the following on the Cloud9 instance:
 - [AWS CLI version 2](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>).
 - [Session Manager plugin](<https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html>).
 
+### Install AWS ParallelCluster
+
+Create your Python3 virtual environment
+
+```bash
+python3 -m venv .env
+source .env/bin/activate
+```
+
+Install AWS ParallelCluster
+
+```bash
+pip3 install aws-parallelcluster==2.10.4
+```
+
+Set AWS Region
+The command below will query the metadata of the AWS Cloud9 instance to determine in which region it has been created.
+
+```bash
+export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
+```
+
 ### Building LAMMPS Image using Packer on AWS
 
 The sample relies on packer to build an AWS Machine Image (AMI) containing an installation of LAMMPS.
@@ -120,26 +142,6 @@ packer build \
 
 ### Deploy AWS ParallelCluster with LAMMPS
 
-Create your Python3 virtual environment
-
-```bash
-# Going back from where you started
-cd ../../
-
-#Create Python3 virtual environment
-python3 -m venv .lammps
-source .lammps/bin/activate
-```
-
-Install AWS ParallelCluster
-
-```bash
-pip3 install aws-parallelcluster==2.10.4
-
-# Set AWS Region
-export AWS_REGION="us-east-2"
-```
-
 Enable [Amazon Macie](<https://aws.amazon.com/macie/>)
 
 ```bash
@@ -149,6 +151,9 @@ aws macie2 enable-macie
 Create AWS ParallelCluster configuration file
 
 ```bash
+# Going back from where you started
+cd ../../
+
 . ./scripts/setup/create_parallelcluster_config.sh
 ```
 
