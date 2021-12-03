@@ -129,7 +129,11 @@ cd amis/amzn2-pc-wrf
 
 # Build the ami using packer
 packer build \
-    -var-file variables.json -var company_name=[COMPANY_NAME] amzn2-pc-wrf.json
+    -var-file variables.json \
+    -var aws_region=${AWS_REGION} \
+    -var parallel_cluster_version=`pcluster version` \
+    -var company_name=[COMPANY_NAME] \
+    amzn2-pc-wrf.json
 ```
 
 ### Deploy AWS ParallelCluster with WRF
