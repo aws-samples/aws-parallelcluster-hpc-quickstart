@@ -104,10 +104,14 @@ else
 fi
 
 
+#Get AWS ParallelCluster Version
+PCLUSTER_VERSION=`pcluster version`
+
+
 # Retrieve WRF Image ID
 WRF_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-2.10.4-wrf-4.2.2-*" \
+    --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-wrf-4.2.2-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
