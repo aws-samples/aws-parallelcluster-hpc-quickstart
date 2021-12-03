@@ -130,10 +130,14 @@ else
 fi
 
 
+#Get AWS ParallelCluster Version
+PCLUSTER_VERSION=`pcluster version`
+
+
 # Retrieve LAMMPS Image ID
 LAMMPS_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-2.10.4-lammps-*" \
+    --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-lammps-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
