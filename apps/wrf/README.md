@@ -76,6 +76,28 @@ The script will install the following on the Cloud9 instance:
 - [AWS CLI version 2](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>).
 - [Session Manager plugin](<https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html>).
 
+### Install AWS ParallelCluster
+
+Create your Python3 virtual environment
+
+```bash
+python3 -m venv .env
+source .env/bin/activate
+```
+
+Install AWS ParallelCluster
+
+```bash
+pip3 install aws-parallelcluster==2.10.4
+```
+
+Set AWS Region
+The command below will query the metadata of the AWS Cloud9 instance to determine in which region it has been created.
+
+```bash
+export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
+```
+
 ### Building WRF Image using Packer on AWS
 
 The sample relies on packer to build an AWS Machine Image (AMI) containing an installation of WRF.
@@ -112,37 +134,20 @@ packer build \
 
 ### Deploy AWS ParallelCluster with WRF
 
-Create your Python3 virtual environment
+Create the AWS ParallelCluster Configuration file.
+Instances that will be used are c5n.18xlarge
 
 ```bash
 # Going back from where you started
 cd ../../
 
-#Create Python3 virtual environment
-python3 -m venv .wrf
-source .wrf/bin/activate
-```
-
-Install AWS ParallelCluster
-
-```bash
-pip3 install aws-parallelcluster==2.10.4
-
-# Set AWS Region
-export AWS_REGION="us-east-1"
-```
-
-Create the AWS ParallelCluster Configuration file.
-Instances that will be used are c5n.18xlarge
-
-```bash
-CLUSTER_NAME="wrf-cluster"
 . ./scripts/setup/create_parallelcluster_config.sh
 ```
 
 Create the WRF Cluster
 
 ```bash
+CLUSTER_NAME="wrf-cluster"
 pcluster create ${CLUSTER_NAME} -c config/wrf-x86-64.ini --region ${AWS_REGION}
 ```
 
