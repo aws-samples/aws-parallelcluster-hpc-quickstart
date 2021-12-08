@@ -1,6 +1,6 @@
 {
   "aws_region": "us-east-1",
-  "parallel_cluster_version": "2.10.4",
+  "parallel_cluster_version": "2.11.3",
   "application_name": "wrf",
   "application_version": "4.2.2",
   "intel_serial_number": "",
