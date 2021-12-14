@@ -48,7 +48,7 @@ AWS Cloud9 contains a collection of tools that let you code, build, run, test, d
 
 #### Create an IAM Role:
 
-1. Open the IAM console[deep link](<https://console.aws.amazon.com/iam/home#/roles%24new?step=type&commonUseCase=EC2%2BEC2&selectedUseCase=EC2&policies=arn:aws:iam::aws:policy%2FAdministratorAccess>) to create an IAM role with Administrator access.
+1. Open the IAM console [deep link](<https://console.aws.amazon.com/iam/home#/roles%24new?step=type&commonUseCase=EC2%2BEC2&selectedUseCase=EC2&policies=arn:aws:iam::aws:policy%2FAdministratorAccess>) to create an IAM role with Administrator access.
 1. Confirm that **AWS service** and **EC2** are selected, then choose **Next: permissions**.
 1. Confirm that **AdministratorAccess** is checked, then choose **Next: Tags** to assign tags.
 1. Keep the defaults, and choose **Next: Review** to review.
