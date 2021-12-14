@@ -1,0 +1,20 @@
+version: 0.2
+
+batch:
+  build-matrix:
+    static:
+      ignore-failure: false
+      env:
+        type: LINUX_CONTAINER
+        compute-type: BUILD_GENERAL1_SMALL
+        image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        privileged-mode: true
+    dynamic:
+      buildspec:
+        - ami_buildspec.yml
+      env:
+        variables:
+          OS_TYPE:
+            - amzn2
+          PC_VERSION:
+            - 2.11.3
