@@ -15,7 +15,7 @@ mkdir -p Gromacs-TestCaseA
 mkdir -p Gromacs-TestCaseB
 
 cd $DATA_DIR/Gromacs-TestCaseA
-wget -qO- https://www.mpibpc.mpg.de/15615646/benchPEP.zip | bsdtar xf - -C $DATA_DIR/TestCaseA
+wget -qO- https://www.mpibpc.mpg.de/15615646/benchPEP.zip | bsdtar xf - -C $DATA_DIR/Gromacs-TestCaseA
 
 cd $DATA_DIR/Gromacs-TestCaseB
-wget -qO- https://www.mpibpc.mpg.de/15101328/benchRIB.zip | bsdtar xf - -C $DATA_DIR/TestCaseB
+wget -qO- https://www.mpibpc.mpg.de/15101328/benchRIB.zip | bsdtar xf - -C $DATA_DIR/Gromacs-TestCaseB
