@@ -1,7 +1,7 @@
 # Packer AMIs Variables
 
-The amis folder contains the packer scripts to a AWS Machine Image (AMI) of LAMMPS.
-It is organized by Operating System (OS) with folder name convention such as `OS-pc-lammps`
+The amis folder contains the packer scripts to a AWS Machine Image (AMI) of Gromacs.
+It is organized by Operating System (OS) with folder name convention such as `OS-pc-gromacs`
 
 Each OS folder has in their respective `variables.json` file that holds the same variables.
 
@@ -9,8 +9,8 @@ Here is a description of the variables and their default value:
 
 | Name                       | Description                                      | Type    | Default                | Required |
 | -------------------------- | ------------------------------------------------ | ------- | ---------------------- | -------- |
-| application\_name          | Application name                                 | String  | lammps                 | no       |
-| application\_version       | LAMMPS version                                   | String  | stable\_29Oct2020      | no       |
+| application\_name          | Application name                                 | String  | gromacs                | no       |
+| application\_version       | Gromacs version                                  | String  | v2021.4                | no       |
 | aws\_region                | AWS Region where packer will create the instance | String  | us-east-2              | no       |
 | company\_name              | Company Name used as AMI name prefix             | String  | None                   | yes      |
 | encrypt\_boot              | Encrypt snaphot and AMI                          | Boolean | False                  | no       |
