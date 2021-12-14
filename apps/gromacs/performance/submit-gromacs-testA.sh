@@ -7,6 +7,7 @@
 #SBATCH --export=ALL
 #SBATCH --nodes=16
 #SBATCH --ntasks-per-node=36
+#SBATCH --cpus-per-task=1
 
 export I_MPI_OFI_LIBRARY_INTERNAL=0
 export I_MPI_OFI_PROVIDER=efa
