@@ -11,7 +11,7 @@ Here is a description of the variables and their default value:
 | -------------------------- | ------------------------------------------------ | ------- | ---------------------- | -------- |
 | application\_name          | Application name                                 | String  | gromacs                | no       |
 | application\_version       | Gromacs version                                  | String  | v2021.4                | no       |
-| aws\_region                | AWS Region where packer will create the instance | String  | us-east-2              | no       |
+| aws\_region                | AWS Region where packer will create the instance | String  | us-east-1              | no       |
 | company\_name              | Company Name used as AMI name prefix             | String  | None                   | yes      |
 | encrypt\_boot              | Encrypt snaphot and AMI                          | Boolean | False                  | no       |
 | env                        | AWS environment type: dev, staging, prod         | String  | dev                    | no       |
