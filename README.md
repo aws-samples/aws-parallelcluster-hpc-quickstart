@@ -12,6 +12,7 @@ The following applications are provided:
 
 - [LAMMPS](<apps/lammps/README.md>)
 - [WRF v4](<apps/wrf/README.md>)
+- [Gromacs](<apps/gromacs/README.md>)
 
 ## Security
 
