@@ -1,0 +1,12 @@
+{
+  "aws_region": "us-east-1",
+  "parallel_cluster_version": "2.11.3",
+  "application_name": "mpas",
+  "application_version": "7.1",
+  "intel_serial_number": "",
+  "instance_type": "m5zn.3xlarge",
+  "encrypt_boot": "false",
+  "name": "amzn2-parallelcluster",
+  "public_ip": "true",
+  "ssh_interface": "session_manager"
+}
