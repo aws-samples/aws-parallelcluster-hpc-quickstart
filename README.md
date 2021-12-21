@@ -10,9 +10,10 @@ It is organized by folder:
 
 The following applications are provided:
 
-- [LAMMPS](<apps/lammps/README.md>)
-- [WRF v4](<apps/wrf/README.md>)
 - [Gromacs](<apps/gromacs/README.md>)
+- [LAMMPS](<apps/lammps/README.md>)
+- [MPAS](<apps/mpas/README.md>)
+- [WRF v4](<apps/wrf/README.md>)
 
 ## Security
 
