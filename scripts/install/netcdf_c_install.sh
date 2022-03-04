@@ -23,7 +23,7 @@ NETCDF_C_VERSION="4.7.4"
 DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2"
 
 NETCDF_C_ARCHIVE="netcdf-c-${NETCDF_C_VERSION}.tar.gz"
-NETCDF_C_URL="https://www.unidata.ucar.edu/downloads/netcdf/ftp/${NETCDF_C_ARCHIVE}"
+NETCDF_C_URL="https://codeload.github.com/Unidata/netcdf-c/tar.gz/refs/tags/v${NETCDF_C_VERSION}"
 
 ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.2.0;openmpi/4.1.0"
 
@@ -94,7 +94,7 @@ do
     # Retrieve archive
     if [ ! -f ${NETCDF_C_ARCHIVE} ]; then
         echo "Download archive"
-        curl -O ${NETCDF_C_URL}
+        curl -o ${NETCDF_C_ARCHIVE} ${NETCDF_C_URL}
     fi
 
     # Check if archive already exist untar
