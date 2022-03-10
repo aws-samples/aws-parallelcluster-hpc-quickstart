@@ -106,7 +106,7 @@ else
 fi
 
 # Install crudini
-pip3 install crudini -U --user
+pip3 install crudini -U
 
 
 echo "[INFO] Create AWS ParallelCluster configuration file for MPAS"
