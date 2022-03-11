@@ -19,16 +19,13 @@ AWS Cloud9 contains a collection of tools that let you code, build, run, test, d
 
 #### Create an AWS Cloud9 environment:
 
+The link below will create an AWS Cloud9 environment from which you will be able to create your cluster.
+
+[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg>)](<https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
+
 1. Open the [AWS Cloud9 console](<https://console.aws.amazon.com/cloud9>).
-1. Choose **[Create Environment](<https://console.aws.amazon.com/cloud9/home/create>)** or open the [link](<https://console.aws.amazon.com/cloud9/home/create>).
-1. For **Name**, enter **myDevEnv**.
-1. Choose **Next step**
-1. For **Cost-saving setting**, choose **After four hours**.
-1. Select **Create a new no-ingress EC2 instance for environment (access via Systems Manager)**.
-1. Leave the remaining parameters to the default.
-1. Choose **Next Step**.
-1. Choose **Create Environment**.
-1. It will start the creation of the Cloud9 environment.
+1. Select **MyCloud9Env**.
+1. Choose **Open IDE**.
 
 #### Disable AWS managed temporary credentials:
 
@@ -37,23 +34,6 @@ AWS Cloud9 contains a collection of tools that let you code, build, run, test, d
 1. In the **Preferences** tab, choose **AWS SETTINGS**.
 1. Turn off the **AWS managed temporary credentials**.
 1. Close the **Preferences** tab.
-
-#### Create an IAM Role:
-
-1. Open the IAM console [deep link](<https://console.aws.amazon.com/iam/home#/roles%24new?step=type&commonUseCase=EC2%2BEC2&selectedUseCase=EC2&policies=arn:aws:iam::aws:policy%2FAdministratorAccess>) to create an IAM role with Administrator access.
-1. Confirm that **AWS service** and **EC2** are selected, then choose **Next: permissions**.
-1. Confirm that **AdministratorAccess** is checked, then choose **Next: Tags** to assign tags.
-1. Keep the defaults, and choose **Next: Review** to review.
-1. For **Name**, enter **cloud9-admin**.
-1. Choose **Create role**.
-
-#### Associate IAM role with Cloud9 Instance:
-
-1. Open the Amazon EC2 [deep link](<https://console.aws.amazon.com/ec2/v2/home#Instances:tag:Name=aws-cloud9-myDevEnv>) to find your Cloud9 instance.
-1. Select the Cloud9 instance.
-1. For **Actions**, choose **Security**, select **Modify IAM Role**.
-1. For **IAM Role**, choose **cloud9-admin**.
-1. Choose **Save**.
 
 ### Prerequisites
 
