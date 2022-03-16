@@ -145,13 +145,13 @@ Create the MPAS Cluster
 
 ```bash
 CLUSTER_NAME="mpas-cluster"
-pcluster create ${CLUSTER_NAME} -c config/mpas-x86-64.ini
+pcluster create ${CLUSTER_NAME} -c config/mpas-x86-64.ini --region ${AWS_REGION}
 ```
 
 Connect to the cluster
 
 ```bash
-pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME}
+pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
 ### Run Supercell test case
@@ -167,8 +167,8 @@ Here are the steps:
 
 ```bash
 cd /fsx
-wget http://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/supercell.tar.gz
-tar -xzf supercell.tar.gz
+curl -LO http://www2.mmm.ucar.edu/projects/mpas/test_cases/v7.0/supercell.tar.gz
+tar -xzf supercell.tar.gz && cd supercell
 ```
 
 #### Run the Supercell simulation
