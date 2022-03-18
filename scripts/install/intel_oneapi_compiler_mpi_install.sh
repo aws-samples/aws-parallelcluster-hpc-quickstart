@@ -66,6 +66,30 @@ done
 
 
 case ${INTEL_VERSION} in
+    2022.1.2 )
+        INTEL_BASE_TOOLKIT_ARCHIVE="l_BaseKit_p_2022.1.2.146.sh"
+        INTEL_BASE_TOOLKIT_URL="${INTEL_BASE_URL}/18487/${INTEL_BASE_TOOLKIT_ARCHIVE}"
+
+        INTEL_HPC_TOOLKIT_ARCHIVE="l_HPCKit_p_2022.1.2.117.sh"
+        INTEL_HPC_TOOLKIT_URL="${INTEL_BASE_URL}/18479/${INTEL_HPC_TOOLKIT_ARCHIVE}"
+        ;;
+
+    2022.1.1 )
+        INTEL_BASE_TOOLKIT_ARCHIVE="l_BaseKit_p_2022.1.1.119.sh"
+        INTEL_BASE_TOOLKIT_URL="${INTEL_BASE_URL}/18445/${INTEL_BASE_TOOLKIT_ARCHIVE}"
+
+        INTEL_HPC_TOOLKIT_ARCHIVE="l_HPCKit_p_2022.1.1.97.sh"
+        INTEL_HPC_TOOLKIT_URL="${INTEL_BASE_URL}/18438/${INTEL_HPC_TOOLKIT_ARCHIVE}"
+        ;;
+
+    2021.4.0 )
+        INTEL_BASE_TOOLKIT_ARCHIVE="l_BaseKit_p_2021.4.0.3422.sh"
+        INTEL_BASE_TOOLKIT_URL="${INTEL_BASE_URL}/18236/${INTEL_BASE_TOOLKIT_ARCHIVE}"
+
+        INTEL_HPC_TOOLKIT_ARCHIVE="l_HPCKit_p_2021.4.0.3347.sh"
+        INTEL_HPC_TOOLKIT_URL="${INTEL_BASE_URL}/18211/${INTEL_HPC_TOOLKIT_ARCHIVE}"
+        ;;
+
     2021.3.0 )
         INTEL_BASE_TOOLKIT_ARCHIVE="l_BaseKit_p_2021.3.0.3219.sh"
         INTEL_BASE_TOOLKIT_URL="${INTEL_BASE_URL}/17977/${INTEL_BASE_TOOLKIT_ARCHIVE}"
@@ -167,16 +191,38 @@ bash ./${INTEL_HPC_TOOLKIT_ARCHIVE} -a -s \
 
 
 #Clean up
+cd
 rm -rf {WORK_DIR}
 
+
+# Capture current modules
+if [ -d ${INTEL_PATH}/modulefiles/compiler ]; then
+    EXISTING_INTEL_COMPILER_MODULES=$(ls ${INTEL_PATH}/modulefiles/compiler)
+fi
+
+if [ -d ${INTEL_PATH}/modulefiles/mpi ]; then
+    EXISTING_INTEL_MPI_MODULES=$(ls ${INTEL_PATH}/modulefiles/mpi)
+fi
+
 # Generate modules
-${INTEL_PATH}/modulefiles-setup.sh --force
+${INTEL_PATH}/modulefiles-setup.sh --force --ignore-latest
 echo "${INTEL_PATH}/modulefiles" >> ${MODULES_PATH}/../init/.modulespath
+
+# Capture new intel modules
+NEW_INTEL_COMPILER_MODULES=$(ls ${INTEL_PATH}/modulefiles/compiler)
+NEW_INTEL_MPI_MODULES=$(ls ${INTEL_PATH}/modulefiles/mpi)
+INTEL_COMPILER_VERSION=`comm -3 <(echo $EXISTING_INTEL_COMPILER_MODULES | tr ' ' '\n' | sort ) <(echo $NEW_INTEL_COMPILER_MODULES | tr ' ' '\n' | sort)`
+INTEL_COMPILER_VERSION=`echo ${INTEL_COMPILER_VERSION}`
+INTEL_MPI_VERSION=`comm -3 <(echo $EXISTING_INTEL_MPI_MODULES | tr ' ' '\n' | sort ) <(echo $NEW_INTEL_MPI_MODULES | tr ' ' '\n' | sort)`
+INTEL_MPI_VERSION=`echo ${INTEL_MPI_VERSION}`
+
+echo "Intel Compiler Version ${INTEL_COMPILER_VERSION}"
+echo "Intel MPI Version ${INTEL_MPI_VERSION}"
 
 #Copy module file
 mkdir -p ${MODULES_PATH}/compiler/intel
-ln -s ${INTEL_PATH}/compiler/${INTEL_VERSION}/modulefiles/compiler ${MODULES_PATH}/compiler/intel/${INTEL_VERSION}
-sed -i "s%^module load debugger%#&%" ${INTEL_PATH}/compiler/${INTEL_VERSION}/modulefiles/compiler
+ln -s ${INTEL_PATH}/compiler/${INTEL_COMPILER_VERSION}/modulefiles/compiler ${MODULES_PATH}/compiler/intel/${INTEL_VERSION}
+sed -i "s%^module load debugger%#&%" ${INTEL_PATH}/compiler/${INTEL_COMPILER_VERSION}/modulefiles/compiler
 
 mkdir -p ${MODULES_PATH}/mpi/intel
-ln -s ${INTEL_PATH}/mpi/${INTEL_VERSION}/modulefiles/mpi ${MODULES_PATH}/mpi/intel/${INTEL_VERSION}
+ln -s ${INTEL_PATH}/mpi/${INTEL_MPI_VERSION}/modulefiles/mpi ${MODULES_PATH}/mpi/intel/${INTEL_VERSION}
