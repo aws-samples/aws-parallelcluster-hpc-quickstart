@@ -142,22 +142,6 @@ yum install -y \
 WORK_DIR=$(mktemp -d /tmp/intel.XXXXXXXXX)
 cd ${WORK_DIR}
 
-# Saving current modules
-cp ${MODULES_PATH}/../init/.modulespath .
-
-# Install Environment modules
-MODULES_VERSION="4.7.1"
-curl -LOJ https://github.com/cea-hpc/modules/releases/download/v${MODULES_VERSION}/modules-${MODULES_VERSION}.tar.gz
-tar -xvzf modules-${MODULES_VERSION}.tar.gz
-cd modules-${MODULES_VERSION}
-./configure --prefix=/usr/share/Modules --modulefilesdir=4{MODULES_PATH}
-make
-make install
-cd ..
-
-# Restore modules
-cp .modulespath ${MODULES_PATH}/../init/.modulespath
-
 
 # Retrieve Intel compiler
 if [ ! -f ${INTEL_BASE_TOOLKIT_ARCHIVE} ]; then
