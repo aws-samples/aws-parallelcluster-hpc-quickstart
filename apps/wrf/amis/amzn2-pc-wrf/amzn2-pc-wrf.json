@@ -32,7 +32,10 @@
           "State": "{{user `state`}}",
           "Env": "{{user `env`}}",
           "OS": "Amazon Linux 2",
-          "Source_AMI": "{{ .SourceAMI }}"
+          "Source_AMI": "{{ .SourceAMI }}",
+          "parallelcluster:version": "{{ user `parallel_cluster_version`}}",
+          "parallelcluster:build_status": "available",
+          "parallelcluster:os": "alinux2"
       },
       "ssh_interface": "{{user `ssh_interface`}}",
       "communicator": "ssh",
@@ -98,12 +101,7 @@
     {
       "type": "shell",
       "inline": [
-        "sudo yum remove -y dpkg"
-      ]
-    },
-    {
-      "type": "shell",
-      "inline": [
+        "sudo yum remove -y dpkg",
         "sudo yum install -y python3-pip",
         "sudo python3 -m pip install ansible==2.9.24"
       ]
