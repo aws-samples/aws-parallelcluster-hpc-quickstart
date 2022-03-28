@@ -27,18 +27,20 @@ else
     echo "[INFO] AWS_REGION = ${AWS_REGION}"
 fi
 
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/wrf-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/wrf-x86-64.yaml"
 
-SSH_KEY_NAME=`crudini --get ${PARALLELCLUSTER_CONFIG} "cluster default" key_name`
+SSH_KEY_NAME=`yq '.HeadNode.Ssh.KeyName' ${PARALLELCLUSTER_CONFIG}`
 
 # Delete AWS Key pair
 echo "[INFO] Deleting SSH Key Pair = ${SSH_KEY_NAME}"
 aws ec2 delete-key-pair --key-name ${SSH_KEY_NAME} --region ${AWS_REGION}
 
+#Get AWS ParallelCluster Version
+PCLUSTER_VERSION=`pcluster version | yq '.version'`
 
 # Delete WRF Image(s) and associated snapshot(s)
-WRF_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*wrf*" --output text --region ${AWS_REGION})
+WRF_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf*" --output text --region ${AWS_REGION})
 echo "[INFO] Deleting WRF AMIs = ${WRF_AMIS}"
-WRF_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*wrf*" --output text --region ${AWS_REGION})
+WRF_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf*" --output text --region ${AWS_REGION})
 for i in ${WRF_AMIS}; do aws ec2 deregister-image --image-id ${i} --region ${AWS_REGION} ; done
 for i in ${WRF_SNAPSHOTS}; do aws ec2 delete-snapshot --snapshot-id ${i} --region ${AWS_REGION}; done

@@ -90,7 +90,7 @@ if [[ -z $AZ_W_INSTANCES ]]; then
 fi
 
 AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
-SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
     Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
@@ -103,15 +103,13 @@ else
     return 1
 fi
 
-
 #Get AWS ParallelCluster Version
-PCLUSTER_VERSION=`pcluster version`
-
+PCLUSTER_VERSION=`pcluster version | yq '.version'`
 
 # Retrieve WRF Image ID
-WRF_AMI=`aws ec2 describe-images --owners self \
+export WRF_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-wrf-4.2.2-*" \
+    --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf-4.2.2-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
@@ -122,24 +120,14 @@ else
     return 1
 fi
 
-
-# Clone crudini repository
-[ ! -d crudini ] && git clone https://github.com/pixelb/crudini
-
-
-# Install crudini
-cd crudini && pip3 install -e . && cd ..
-
-
 echo "[INFO] Create AWS ParallelCluster configuration file for WRF"
 # Change the cluster configuration file
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/wrf-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/wrf-x86-64.yaml"
 
-# Change the cluster configuration file
-crudini --set ${PARALLELCLUSTER_CONFIG} "aws" aws_region_name "${AWS_REGION}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" vpc_id "${VPC_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" master_subnet_id "${SUBNET_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" key_name "${SSH_KEY_NAME}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" custom_ami "${WRF_AMI}"
+yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Image.CustomAmi = strenv(WRF_AMI)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
 
 echo "[DONE] Created AWS ParallelCluster configuration file for WRF"
