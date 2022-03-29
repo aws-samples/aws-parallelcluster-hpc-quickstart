@@ -70,7 +70,7 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==2.11.3
+pip3 install aws-parallelcluster==3.1.2
 ```
 
 Set AWS Region
@@ -104,7 +104,7 @@ You can accomplish this by typing:
 
 ```bash
 # Set OS for WRF to be amzn2
-OS_WRF=amzn2
+OS_TYPE=amzn2
 
 # Go to the corresponding folder
 cd amis/amzn2-pc-wrf
@@ -134,13 +134,13 @@ Create the WRF Cluster
 
 ```bash
 CLUSTER_NAME="wrf-cluster"
-pcluster create ${CLUSTER_NAME} -c config/wrf-x86-64.ini --region ${AWS_REGION}
+pcluster create-cluster -n ${CLUSTER_NAME} -c config/wrf-x86-64.yaml --region ${AWS_REGION}
 ```
 
 Connect to the cluster
 
 ```bash
-pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
+pcluster ssh -n ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
 ## Run WRF v4
@@ -230,7 +230,7 @@ To avoid unexpected charges to your account relative to the WRF cluster, make su
 ### Delete the cluster.
 
 ```bash
-pcluster delete ${CLUSTER_NAME} --region ${AWS_REGION}
+pcluster delete-cluster -n ${CLUSTER_NAME} --region ${AWS_REGION}
 ```
 
 **The steps below are optional if you plan to deploy a cluster with WRF in the future.**

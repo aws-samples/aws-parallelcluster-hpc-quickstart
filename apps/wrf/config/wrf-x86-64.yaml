@@ -1,0 +1,55 @@
+Region: '{AWS_REGION}'
+Image:
+  CustomAmi: '{WRF_AMI}'
+  Os: alinux2
+SharedStorage:
+  - Name: myebs
+    StorageType: Ebs
+    MountDir: /shared
+    EbsSettings:
+      VolumeType: gp2
+      Size: 20
+  - Name: myfsx
+    StorageType: FsxLustre
+    MountDir: /fsx
+    FsxLustreSettings:
+      StorageCapacity: 1200
+      DeploymentType: SCRATCH_2
+HeadNode:
+  InstanceType: c5.xlarge
+  Networking:
+    SubnetId: '{SUBNET_ID}'
+  Ssh:
+    KeyName: '{SSH_KEY_NAME}'
+  LocalStorage:
+    RootVolume:
+      Size: 40
+  Iam:
+    AdditionalIamPolicies:
+      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+    - Name: c5n18large
+      ComputeResources:
+        - Name: c5n18large
+          InstanceType: c5n.18xlarge
+          MinCount: 0
+          MaxCount: 64
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: true
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+        PlacementGroup:
+          Enabled: true
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40
