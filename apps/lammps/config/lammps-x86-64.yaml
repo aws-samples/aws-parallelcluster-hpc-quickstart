@@ -1,0 +1,102 @@
+Region: '{AWS_REGION}'
+Image:
+  CustomAmi: '{LAMMPS_AMI}'
+  Os: alinux2
+SharedStorage:
+  - Name: myebs
+    StorageType: Ebs
+    MountDir: /shared
+    EbsSettings:
+      VolumeType: gp2
+      Size: 20
+  - Name: myfsx
+    StorageType: FsxLustre
+    MountDir: /fsx
+    FsxLustreSettings:
+      StorageCapacity: 7200
+      DeploymentType: SCRATCH_2
+      ImportPath: '{BUCKET_URL}'
+HeadNode:
+  InstanceType: c5.4xlarge
+  Networking:
+    SubnetId: '{SUBNET_ID}'
+  Ssh:
+    KeyName: '{SSH_KEY_NAME}'
+  Dcv:
+    Enabled: true
+  LocalStorage:
+    RootVolume:
+      Size: 40
+  Iam:
+    AdditionalIamPolicies:
+      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+    - Name: c5n-od
+      ComputeResources:
+        - Name: c5n18xlarge
+          InstanceType: c5n.18xlarge
+          MinCount: 0
+          MaxCount: 500
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: true
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+        PlacementGroup:
+          Enabled: true
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40
+    - Name: c6i-od
+      ComputeResources:
+        - Name: c6i32xlarge
+          InstanceType: c6i.32xlarge
+          MinCount: 0
+          MaxCount: 500
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: true
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+        PlacementGroup:
+          Enabled: true
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40
+    - Name: hpc6a-od
+      ComputeResources:
+        - Name: hpc6a48xlarge
+          InstanceType: hpc6a.48xlarge
+          MinCount: 0
+          MaxCount: 500
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: true
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+        PlacementGroup:
+          Enabled: true
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40
