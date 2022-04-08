@@ -82,7 +82,7 @@ echo "[INFO] SSH_KEY_NAME = ${SSH_KEY_NAME}"
 # Retrieve VPC ID and Subnet ID
 # You can alternatively set to the VPC ID of your choice insteasd of the default VPC
 if [[ -z ${VPC_ID} ]]; then
-    VPC_ID=`aws ec2 describe-vpcs --output text \
+   export  VPC_ID=`aws ec2 describe-vpcs --output text \
         --query 'Vpcs[*].VpcId' \
         --filters Name=isDefault,Values=true \
         --region ${AWS_REGION}`
@@ -116,7 +116,7 @@ if [[ -z $AZ_W_INSTANCES ]]; then
 fi
 
 AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
-SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
     Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
@@ -129,13 +129,11 @@ else
     return 1
 fi
 
-
-#Get AWS ParallelCluster Version
-PCLUSTER_VERSION=`pcluster version`
-
+#Get AWS ParallelCluster version
+PCLUSTER_VERSION=`pcluster version | yq '.version'`
 
 # Retrieve LAMMPS Image ID
-LAMMPS_AMI=`aws ec2 describe-images --owners self \
+export LAMMPS_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
     --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-lammps-*" \
     --region ${AWS_REGION} \
@@ -148,24 +146,21 @@ else
     return 1
 fi
 
-
-# Clone crudini repository
-[ ! -d crudini ] && git clone https://github.com/pixelb/crudini
-
-
-# Install crudini
-cd crudini && pip3 install -e . && cd ..
-
-
 echo "[INFO] Create AWS ParallelCluster configuration file for LAMMPS"
 # Change the cluster configuration file
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/lammps-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/lammps-x86-64.yaml"
 
-crudini --set ${PARALLELCLUSTER_CONFIG} "aws" aws_region_name "${AWS_REGION}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" vpc_id "${VPC_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" master_subnet_id "${SUBNET_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" key_name "${SSH_KEY_NAME}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" custom_ami "${LAMMPS_AMI}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "fsx parallel-fs" import_path "s3://${BUCKET_NAME_DATA}"
+yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Image.CustomAmi = strenv(LAMMPS_AMI)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+
+#construct bucket url
+export BUCKET_URL="s3://$BUCKET_NAME_DATA"
+
+yq -i '.SharedStorage[1].FsxLustreSettings.ImportPath = strenv(BUCKET_URL)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[1].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[2].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
 
 echo "[DONE] Created AWS ParallelCluster configuration file for LAMMPS"

@@ -12,8 +12,8 @@ You can use AWS CloudFormation to deploy the following [CloudFormation stack](<h
 You can limit external access to compute instances by:
 
 - setting up the network infrastucture described above
-- set `use_public_ips = false` in the `config/lammps-x86-64.ini`
-- set `compute_subnet_id = ` in the **vpc** section of `config/lammps-x86-64.ini` to a private subnet
+- set `use_public_ips = false` in the `config/lammps-x86-64.yaml`
+- set `compute_subnet_id = ` in the **vpc** section of `config/lammps-x86-64.yaml` to a private subnet
 
 ![LAMMPS_Architecture](<docs/images/LAMMPS_Architecture.png> "LAMMPS Architecture")
 
@@ -78,7 +78,7 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==2.11.3
+pip3 install aws-parallelcluster==3.1.2
 ```
 
 Set AWS Region
@@ -147,13 +147,13 @@ Create Cluster
 
 ```bash
 CLUSTER_NAME="lammps-cluster"
-pcluster create ${CLUSTER_NAME} -c ./config/lammps-x86-64.ini --region ${AWS_REGION}
+pcluster create-cluster -n ${CLUSTER_NAME} -c ./config/lammps-x86-64.yaml --region ${AWS_REGION}
 ```
 
 Connect to the cluster
 
 ```bash
-pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
+pcluster ssh -n ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
 ## LAMMPS Performance
@@ -182,7 +182,7 @@ To avoid unexpected charges to your account relative to the LAMMPS cluster, make
 Delete the cluster
 
 ```bash
-pcluster delete ${CLUSTER_NAME} --region ${AWS_REGION}
+pcluster delete-cluster -n ${CLUSTER_NAME} --region ${AWS_REGION}
 ```
 
 **The steps below are optional if you plan to deploy a cluster with LAMMPS in the future.**
