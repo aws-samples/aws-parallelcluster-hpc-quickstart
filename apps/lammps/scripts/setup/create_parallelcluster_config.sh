@@ -129,10 +129,6 @@ else
     return 1
 fi
 
-# Install yq
-YQ_VERSION=4.21.1
-sudo wget https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
-
 #Get AWS ParallelCluster version
 PCLUSTER_VERSION=`pcluster version | yq '.version'`
 
