@@ -27,10 +27,10 @@ else
     echo "[INFO] AWS_REGION = ${AWS_REGION}"
 fi
 
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/lammps-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/lammps-x86-64.yaml"
 
-SSH_KEY_NAME=`crudini --get ${PARALLELCLUSTER_CONFIG} "cluster default" key_name`
-BUCKET_NAME_DATA=`crudini --get ${PARALLELCLUSTER_CONFIG} "fsx parallel-fs" import_path`
+SSH_KEY_NAME=`yq '.HeadNode.Ssh.KeyName' ${PARALLELCLUSTER_CONFIG}`
+BUCKET_NAME_DATA=`yq '.SharedStorage[1].FsxLustreSettings.ImportPath' ${PARALLELCLUSTER_CONFIG}`
 
 # Delete AWS Key pair
 echo "[INFO] Deleting SSH Key Pair = ${SSH_KEY_NAME}"
