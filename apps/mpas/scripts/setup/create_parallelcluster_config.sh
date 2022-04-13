@@ -75,7 +75,7 @@ if [[ -z $AZ_W_INSTANCES ]]; then
 fi
 
 AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
-SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
     Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
@@ -92,7 +92,7 @@ fi
 PCLUSTER_VERSION=`pcluster version | jq -r '.version'`
 
 # Retrieve MPAS Image ID
-MPAS_AMI=`aws ec2 describe-images --owners self \
+export MPAS_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
     --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-mpas-7.1-*" \
     --region ${AWS_REGION} \
