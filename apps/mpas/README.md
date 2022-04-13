@@ -69,7 +69,6 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 uninstall pyrsistent
 pip3 install pyrsistent==0.16.1
 pip3 install aws-parallelcluster==3.1.2
 
@@ -130,13 +129,13 @@ Create the MPAS Cluster
 
 ```bash
 CLUSTER_NAME="mpas-cluster"
-pcluster create ${CLUSTER_NAME} -c config/mpas-x86-64.ini --region ${AWS_REGION}
+pcluster create-cluster -n ${CLUSTER_NAME} -c config/mpas-x86-64.yaml --region ${AWS_REGION}
 ```
 
 Connect to the cluster
 
 ```bash
-pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
+pcluster ssh -n ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
 ### Run Supercell test case

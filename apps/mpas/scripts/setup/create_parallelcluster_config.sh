@@ -89,7 +89,7 @@ else
 fi
 
 #Get AWS ParallelCluster Version
-PCLUSTER_VERSION=`pcluster version`
+PCLUSTER_VERSION=`pcluster version | jq -r '.version'`
 
 # Retrieve MPAS Image ID
 MPAS_AMI=`aws ec2 describe-images --owners self \
@@ -111,7 +111,7 @@ pip3 install crudini -U
 
 echo "[INFO] Create AWS ParallelCluster configuration file for MPAS"
 # Change the cluster configuration file
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.yaml"
 
 # Change the cluster configuration file
 crudini --set ${PARALLELCLUSTER_CONFIG} "aws" aws_region_name "${AWS_REGION}"
