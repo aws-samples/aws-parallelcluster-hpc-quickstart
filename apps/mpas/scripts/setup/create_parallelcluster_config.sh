@@ -111,7 +111,7 @@ PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.yaml"
 
 # Change the cluster configuration file
 yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
-yq -i '.Image.CustomAmi = strenv(WRF_AMI)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Image.CustomAmi = strenv(MPAS_AMI)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
