@@ -1,6 +1,6 @@
 Region: '{AWS_REGION}'
 Image:
-  CustomAmi: '{WRF_AMI}'
+  CustomAmi: '{MPAS_AMI}'
   Os: alinux2
 SharedStorage:
   - Name: myebs
