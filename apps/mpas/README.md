@@ -69,7 +69,9 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==2.11.3
+pip3 uninstall pyrsistent
+pip3 install pyrsistent==0.16.1
+pip3 install aws-parallelcluster==3.1.2
 
 # Set AWS Region
 export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
@@ -108,7 +110,7 @@ cd amis/amzn2-pc-mpas
 packer build \
     -var-file variables.json \
     -var aws_region=${AWS_REGION} \
-    -var parallel_cluster_version=`pcluster version` \
+    -var parallel_cluster_version=`pcluster version | jq -r '.version'` \
     -var company_name=[COMPANY_NAME] \
     amzn2-pc-mpas.json
 ```
