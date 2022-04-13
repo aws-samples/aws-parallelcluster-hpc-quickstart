@@ -105,19 +105,15 @@ else
     return 1
 fi
 
-# Install crudini
-pip3 install crudini -U
-
-
 echo "[INFO] Create AWS ParallelCluster configuration file for MPAS"
 # Change the cluster configuration file
 PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.yaml"
 
 # Change the cluster configuration file
-crudini --set ${PARALLELCLUSTER_CONFIG} "aws" aws_region_name "${AWS_REGION}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" vpc_id "${VPC_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" master_subnet_id "${SUBNET_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" key_name "${SSH_KEY_NAME}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" custom_ami "${MPAS_AMI}"
+yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Image.CustomAmi = strenv(WRF_AMI)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
 
 echo "[DONE] Created AWS ParallelCluster configuration file for MPAS"
