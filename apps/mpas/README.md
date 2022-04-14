@@ -69,7 +69,6 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install pyrsistent==0.16.1
 pip3 install aws-parallelcluster==3.1.2
 
 # Set AWS Region
