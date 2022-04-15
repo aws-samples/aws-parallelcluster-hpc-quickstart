@@ -204,7 +204,7 @@ To avoid unexpected charges to your account relative to the WRF cluster, make su
 ### Delete the cluster.
 
 ```bash
-pcluster delete -n ${CLUSTER_NAME} --region ${AWS_REGION}
+pcluster delete-cluster -n ${CLUSTER_NAME} --region ${AWS_REGION}
 ```
 
 **The steps below are optional if you plan to deploy a cluster with WRF in the future.**
