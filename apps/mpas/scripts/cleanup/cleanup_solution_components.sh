@@ -10,9 +10,9 @@ else
     echo "[INFO] AWS_REGION = ${AWS_REGION}"
 fi
 
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/mpas-x86-64.yaml"
 
-SSH_KEY_NAME=`crudini --get ${PARALLELCLUSTER_CONFIG} "cluster default" key_name`
+export SSH_KEY_NAME=`crudini --get ${PARALLELCLUSTER_CONFIG} "cluster default" key_name`
 
 # Delete AWS Key pair
 echo "[INFO] Deleting SSH Key Pair = ${SSH_KEY_NAME}"

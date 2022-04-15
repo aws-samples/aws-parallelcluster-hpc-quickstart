@@ -69,7 +69,7 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==2.11.3
+pip3 install aws-parallelcluster==3.1.2
 
 # Set AWS Region
 export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
@@ -108,7 +108,7 @@ cd amis/amzn2-pc-mpas
 packer build \
     -var-file variables.json \
     -var aws_region=${AWS_REGION} \
-    -var parallel_cluster_version=`pcluster version` \
+    -var parallel_cluster_version=`pcluster version | jq -r '.version'` \
     -var company_name=[COMPANY_NAME] \
     amzn2-pc-mpas.json
 ```
@@ -128,13 +128,13 @@ Create the MPAS Cluster
 
 ```bash
 CLUSTER_NAME="mpas-cluster"
-pcluster create ${CLUSTER_NAME} -c config/mpas-x86-64.ini --region ${AWS_REGION}
+pcluster create-cluster -n ${CLUSTER_NAME} -c config/mpas-x86-64.yaml --region ${AWS_REGION}
 ```
 
 Connect to the cluster
 
 ```bash
-pcluster ssh ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
+pcluster ssh -n ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
 ### Run Supercell test case
@@ -204,7 +204,7 @@ To avoid unexpected charges to your account relative to the WRF cluster, make su
 ### Delete the cluster.
 
 ```bash
-pcluster delete ${CLUSTER_NAME} --region ${AWS_REGION}
+pcluster delete-cluster -n ${CLUSTER_NAME} --region ${AWS_REGION}
 ```
 
 **The steps below are optional if you plan to deploy a cluster with WRF in the future.**
