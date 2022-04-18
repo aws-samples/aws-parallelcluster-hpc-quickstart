@@ -11,9 +11,10 @@ batch:
         privileged-mode: true
     dynamic:
       buildspec:
-        - apps/wrf/ami_buildspec.yml
-        - apps/mpas/ami_buildspec.yml
         - apps/gromacs/ami_buildspec.yml
+        - apps/lammps/ami_buildspec.yml
+        - apps/mpas/ami_buildspec.yml
+        - apps/wrf/ami_buildspec.yml
       env:
         variables:
           OS_TYPE:
