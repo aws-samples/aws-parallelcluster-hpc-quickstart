@@ -116,7 +116,7 @@ if [[ -z $AZ_W_INSTANCES ]]; then
 fi
 
 AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
-SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
     Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
@@ -131,13 +131,13 @@ fi
 
 
 #Get AWS ParallelCluster Version
-PCLUSTER_VERSION=`pcluster version`
+PCLUSTER_VERSION=`pcluster version | yq '.version'`
 
 
 # Retrieve Gromacs Image ID
-GROMACS_AMI=`aws ec2 describe-images --owners self \
+export GROMACS_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-gromacs-*" \
+    --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-gromacs-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
@@ -159,13 +159,16 @@ cd crudini && pip3 install -e . && cd ..
 
 echo "[INFO] Create AWS ParallelCluster configuration file for Gromacs"
 # Change the cluster configuration file
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/gromacs-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/gromacs-x86-64.yaml"
 
-crudini --set ${PARALLELCLUSTER_CONFIG} "aws" aws_region_name "${AWS_REGION}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" vpc_id "${VPC_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "vpc public" master_subnet_id "${SUBNET_ID}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" key_name "${SSH_KEY_NAME}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "cluster default" custom_ami "${GROMACS_AMI}"
-crudini --set ${PARALLELCLUSTER_CONFIG} "fsx parallel-fs" import_path "s3://${BUCKET_NAME_DATA}"
+yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Image.CustomAmi = strenv(GROMACS_AMI)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+
+#construct bucket url
+export BUCKET_URL="s3://$BUCKET_NAME_DATA"
+yq -i '.SharedStorage[1].FsxLustreSettings.ImportPath = strenv(BUCKET_URL)' ${PARALLELCLUSTER_CONFIG}
 
 echo "[DONE] Created AWS ParallelCluster configuration file for GROMACS"

@@ -27,10 +27,10 @@ else
     echo "[INFO] AWS_REGION = ${AWS_REGION}"
 fi
 
-PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/gromacs-x86-64.ini"
+PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/gromacs-x86-64.yaml"
 
-SSH_KEY_NAME=`crudini --get ${PARALLELCLUSTER_CONFIG} "cluster default" key_name`
-BUCKET_NAME_DATA=`crudini --get ${PARALLELCLUSTER_CONFIG} "fsx parallel-fs" import_path`
+SSH_KEY_NAME=`yq '.HeadNode.Ssh.KeyName' ${PARALLELCLUSTER_CONFIG}`
+BUCKET_NAME_DATA=`yq '.SharedStorage[1].FsxLustreSettings.ImportPath' ${PARALLELCLUSTER_CONFIG}`
 
 # Delete AWS Key pair
 echo "[INFO] Deleting SSH Key Pair = ${SSH_KEY_NAME}"
@@ -49,8 +49,8 @@ aws s3 rb s3://${BUCKET_NAME_DATA_LOGS} --region ${AWS_REGION} --force
 
 
 # Delete GROMACS Image(s) and associated snapshot(s)
-GROMACS_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*gromacs*" --output text --region ${AWS_REGION})
+GROMACS_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-gromacs-*" --output text --region ${AWS_REGION})
 echo "[INFO] Deleting GROMACS AMIs = ${GROMACS_AMIS}"
-GROMACS_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*gromacs*" --output text --region ${AWS_REGION})
+GROMACS_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf*" --output text --region ${AWS_REGION})
 for i in ${GROMACS_AMIS}; do aws ec2 deregister-image --image-id ${i} --region ${AWS_REGION} ; done
 for i in ${GROMACS_SNAPSHOTS}; do aws ec2 delete-snapshot --snapshot-id ${i} --region ${AWS_REGION}; done

@@ -29,9 +29,9 @@ phases:
       - cd ${CODEBUILD_SRC_DIR}
   post_build:
     commands:
-      - egrep "${AWS_REGION}\:\sami\-" ${CODEBUILD_SRC_DIR}/apps/gromacs/amis/${OS_TYPE}-pc-gromacs/build_${OS_TYPE}.log | cut -d' ' -f2 > ami_id_${OS_TYPE}.txt
+      - egrep "${AWS_REGION}\:\sami\-" ${CODEBUILD_SRC_DIR}/apps/gromacs/amis/${OS_TYPE}-pc-gromacs/build_${OS_TYPE}.log | cut -d' ' -f2 > ${CODEBUILD_SRC_DIR}/ami_id_${OS_TYPE}.txt
       # Packer doesn't return non-zero status; we must do that if Packer build failed
-      - test -s ami_id_${OS_TYPE}.txt || exit 1
+      - test -s ${CODEBUILD_SRC_DIR}/ami_id_${OS_TYPE}.txt || exit 1
       - echo "build completed on `date`"
 artifacts:
   files:

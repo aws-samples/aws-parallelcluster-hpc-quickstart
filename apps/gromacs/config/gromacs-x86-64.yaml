@@ -1,0 +1,56 @@
+Region: '{AWS_REGION}'
+Image:
+  CustomAmi: '{GROMACS_AMI}'
+  Os: alinux2
+SharedStorage:
+  - MountDir: /shared
+    Name: default-ebs
+    StorageType: Ebs
+  - Name: parallel-fs
+    StorageType: FsxLustre
+    MountDir: /fsx
+    FsxLustreSettings:
+      StorageCapacity: 7200
+      DeploymentType: SCRATCH_2
+HeadNode:
+  InstanceType: c5.xlarge
+  Networking:
+    SubnetId: '{SUBNET_ID}'
+    ElasticIp: true
+  Ssh:
+    KeyName: '{SSH_KEY_NAME}'
+  LocalStorage:
+    RootVolume:
+      Size: 40
+  Dcv:
+    Enabled: true
+    Port: 8443
+  Iam:
+    AdditionalIamPolicies:
+      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+    - Name: c5n-od
+      ComputeResources:
+        - Name: c5n
+          InstanceType: c5n.18xlarge
+          MinCount: 0
+          MaxCount: 500
+          DisableSimultaneousMultithreading: true
+          Efa:
+            Enabled: true
+      Iam:
+        AdditionalIamPolicies:
+          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+        PlacementGroup:
+          Enabled: true
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40

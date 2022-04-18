@@ -121,7 +121,7 @@ cd amis/amzn2-pc-lammps
 packer build \
     -var-file variables.json \
     -var aws_region=${AWS_REGION} \
-    -var parallel_cluster_version=`pcluster version` \
+    -var parallel_cluster_version=`pcluster version | jq -r '.version'` \
     -var company_name=[COMPANY_NAME] \
     amzn2-pc-lammps.json
 ```
