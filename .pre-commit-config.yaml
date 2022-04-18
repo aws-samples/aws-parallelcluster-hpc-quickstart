@@ -9,7 +9,7 @@ repos:
     -   id: check-yaml
     -   id: detect-aws-credentials
     -   id: end-of-file-fixer
-    -   id: pretty-format-json
+    -   id: check-json
     -   id: trailing-whitespace
 -  repo: https://github.com/pre-commit/mirrors-yapf
    rev: v0.30.0
