@@ -1,0 +1,39 @@
+version: 0.2
+
+env:
+  shell: bash
+  variables:
+    PACKER_VERSION: "1.7.10"
+    PACKER_VERSION_SHA256SUM: "1c8c176dd30f3b9ec3b418f8cb37822261ccebdaf0b01d9b8abf60213d1205cb"
+    COMPANY: "AnyCompany"
+    AWS_REGION: "us-east-1"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Installing Packer"
+      - curl -O https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
+      - echo "${PACKER_VERSION_SHA256SUM}  packer_${PACKER_VERSION}_linux_amd64.zip" > checksum && sha256sum -c checksum
+      - unzip packer_${PACKER_VERSION}_linux_amd64.zip
+      - echo "Install session manager CLI"
+      - curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o "session-manager-plugin.rpm"
+      - yum install -y session-manager-plugin.rpm
+      - echo "Validating Packer template ${OS_TYPE}"
+      - cd ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas
+      - ${CODEBUILD_SRC_DIR}/packer validate -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json
+      - cd ${CODEBUILD_SRC_DIR}
+  build:
+    commands:
+      - cd ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas
+      - ${CODEBUILD_SRC_DIR}/packer build -color=false -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json | tee ${CODEBUILD_SRC_DIR}/apps/mpas/amis/build_${OS_TYPE}.log
+      - cd ${CODEBUILD_SRC_DIR}
+  post_build:
+    commands:
+      - egrep "${AWS_REGION}\:\sami\-" ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas/build_${OS_TYPE}.log | cut -d' ' -f2 > ami_id_${OS_TYPE}.txt
+      # Packer doesn't return non-zero status; we must do that if Packer build failed
+      - test -s ami_id_${OS_TYPE}.txt || exit 1
+      - echo "build completed on `date`"
+artifacts:
+  files:
+    - ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas/build_${OS_TYPE}.log
+  discard-paths: yes

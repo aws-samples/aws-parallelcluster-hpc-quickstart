@@ -12,6 +12,7 @@ batch:
     dynamic:
       buildspec:
         - apps/wrf/ami_buildspec.yml
+        - apps/mpas/ami_buildspec.yml
       env:
         variables:
           OS_TYPE:
