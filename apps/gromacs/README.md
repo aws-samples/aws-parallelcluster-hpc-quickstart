@@ -109,7 +109,7 @@ You can accomplish this by typing:
 
 ```bash
 # Set OS for Gromacs to be amzn2
-OS_GROMACS=amzn2
+OS_TYPE=amzn2
 
 # Go to the corresponding folder
 cd amis/amzn2-pc-gromacs
