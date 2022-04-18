@@ -31,7 +31,7 @@
           "State": "{{user `state`}}",
           "Env": "{{user `env`}}",
           "OS": "Amazon Linux 2",
-          "Source_AMI": "{{ .SourceAMI }}"
+          "Source_AMI": "{{ .SourceAMI }}",
           "parallelcluster:version": "{{ user `parallel_cluster_version`}}",
           "parallelcluster:build_status": "available",
           "parallelcluster:os": "alinux2"
