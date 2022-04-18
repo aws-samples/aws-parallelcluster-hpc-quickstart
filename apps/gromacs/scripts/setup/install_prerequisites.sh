@@ -56,3 +56,7 @@ sudo yum install -y session-manager-plugin.rpm
 # Install jq
 echo "[INFO] Install jq"
 sudo yum install -y jq
+
+# Install yq
+YQ_VERSION=4.21.1
+sudo wget https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
