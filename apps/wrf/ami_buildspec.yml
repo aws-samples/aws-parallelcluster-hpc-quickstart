@@ -25,13 +25,13 @@ phases:
   build:
     commands:
       - cd ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf
-      - ${CODEBUILD_SRC_DIR}/packer build -color=false -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-wrf.json | tee ${CODEBUILD_SRC_DIR}/apps/wrf/amis/build_${OS_TYPE}.log
+      - ${CODEBUILD_SRC_DIR}/packer build -color=false -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-wrf.json | tee ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf/build_${OS_TYPE}.log
       - cd ${CODEBUILD_SRC_DIR}
   post_build:
     commands:
-      - egrep "${AWS_REGION}\:\sami\-" ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf/build_${OS_TYPE}.log | cut -d' ' -f2 > ${CODEBUILD_SRC_DIR}/ami_id_${OS_TYPE}.txt
+      - egrep "${AWS_REGION}\:\sami\-" ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf/build_${OS_TYPE}.log | cut -d' ' -f2 > ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf/ami_id_${OS_TYPE}.txt
       # Packer doesn't return non-zero status; we must do that if Packer build failed
-      - test -s ${CODEBUILD_SRC_DIR}/ami_id_${OS_TYPE}.txt || exit 1
+      - test -s ${CODEBUILD_SRC_DIR}/apps/wrf/amis/${OS_TYPE}-pc-wrf/ami_id_${OS_TYPE}.txt || exit 1
       - echo "build completed on `date`"
 artifacts:
   files:
