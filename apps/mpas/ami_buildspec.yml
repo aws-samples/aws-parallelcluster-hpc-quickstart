@@ -20,12 +20,12 @@ phases:
       - yum install -y session-manager-plugin.rpm
       - echo "Validating Packer template ${OS_TYPE}"
       - cd ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas
-      - ${CODEBUILD_SRC_DIR}/packer validate -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json
+      - ${CODEBUILD_SRC_DIR}/packer validate -var-file variables.json -var aws_region=${AWS_REGION} -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json
       - cd ${CODEBUILD_SRC_DIR}
   build:
     commands:
       - cd ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas
-      - ${CODEBUILD_SRC_DIR}/packer build -color=false -var-file variables.json -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json | tee ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas/build_${OS_TYPE}.log
+      - ${CODEBUILD_SRC_DIR}/packer build -color=false -var-file variables.json -var aws_region=${AWS_REGION} -var company_name=${COMPANY} -var parallel_cluster_version=${PC_VERSION} ${OS_TYPE}-pc-mpas.json | tee ${CODEBUILD_SRC_DIR}/apps/mpas/amis/${OS_TYPE}-pc-mpas/build_${OS_TYPE}.log
       - cd ${CODEBUILD_SRC_DIR}
   post_build:
     commands:
