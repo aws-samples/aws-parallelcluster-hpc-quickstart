@@ -104,7 +104,7 @@ AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
 
 # Set a subnet id by finding which subnet of the VPC is corresponding to the Availability Zone
 # where EC2 instance are available.
-SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
     Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
@@ -119,9 +119,9 @@ else
 fi
 
 
-CUSTOM_AMI=`aws ec2 describe-images --owners 111992169430 \
+export CUSTOM_AMI=`aws ec2 describe-images --owners 280472923663 \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-3.1.1-wrf-4.2.2-*" \
+    --filters "Name=name,Values=*-amzn2-parallelcluster-3.1.2-wrf-4.2.2-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
