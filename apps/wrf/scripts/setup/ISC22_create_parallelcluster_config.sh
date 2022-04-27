@@ -18,11 +18,23 @@
 
 sudo yum -y -q install jq
 
-AWS_REGION=$(curl --silent http://169.254.169.254/latest/meta-data/placement/region)
-echo "export AWS_REGION=${AWS_REGION}" > env_vars
 
-INSTANCES=c5n.18xlarge,m5.2xlarge
+# Define AWS Region
+if [ -z ${AWS_REGION} ]; then
+    echo "[WARNING] AWS_REGION environment variable is not set, automatically set depending where you run this script"
+    export AWS_REGION=$(curl --silent http://169.254.169.254/latest/meta-data/placement/region)
+fi
+echo "export AWS_REGION=${AWS_REGION}" > env_vars
+echo "[INFO] AWS_REGION = ${AWS_REGION}"
+
+# Define Instances seperated by ','.
+if [ -z ${INSTANCES} ]; then
+    echo "[WARNING] INSTANCES environment variable is not set, automatically set to c5n.18xlarge,m5.2xlarge."
+    export INSTANCES=c5n.18xlarge,m5.2xlarge
+fi
 echo "export INSTANCES=${INSTANCES}" >> env_vars
+echo "[INFO] INSTANCES = ${INSTANCES}"
+
 
 # Create SSH Key
 export SSH_KEY_NAME="hpc-lab-key"
@@ -75,8 +87,9 @@ AZ_W_INSTANCES=`aws ec2 describe-availability-zones --region eu-west-1 \
     --query AvailabilityZones[].ZoneName | jq -r '.[]'`
 
 INSTANCE_TYPE_COUNT=`echo ${INSTANCES} | awk -F "," '{print NF-1}'`
+AZ_COUNT=`echo ${AZ_W_INSTANCES} | tr -s ',' ' ' | wc -w`
 
-if [ ${INSTANCE_TYPE_COUNT} -gt 0 ]; then
+if [ ${INSTANCE_TYPE_COUNT} -gt 0 ] && [ ${AZ_COUNT} -gt 1  ]; then
     AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' '\n' | uniq -d`
 fi
 AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' ',' | sed 's%,$%%g'`
