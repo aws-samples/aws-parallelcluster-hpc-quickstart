@@ -80,7 +80,7 @@ export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placeme
 The sample relies on packer to build an AWS Machine Image (AMI) containing an installation of MPAS.
 It is compiled and optimized for Intel Xeon Scalable Processor using the following compiler and MPI combination:
 
-- Intel oneAPI compiler and Intel oneAPI MPI 2021.3.0
+- Intel oneAPI compiler and Intel oneAPI MPI 2022.1.2
 - GNU 10.3.0 and Open MPI 4.1.0
 
 The packer scripts are located in the amis folder and are organized by Operating System (OS) such as `\[OS\]-pc-mpas`.
@@ -176,7 +176,7 @@ export I_MPI_OFI_PROVIDER=efa
 
 module purge
 module load metis/5.1.0-gcc-10.3.0
-module load mpas-omp/7.1-intel-2021.3.0
+module load mpas-omp/7.1-intel-2022.1.2
 
 #Create mesh decomposition for the specified MPI ranks
 gpmetis -minconn -contig -niter=200 supercell.graph.info \${SLURM_NPROCS}

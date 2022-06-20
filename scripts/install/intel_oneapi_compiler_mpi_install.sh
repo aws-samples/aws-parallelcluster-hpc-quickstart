@@ -19,7 +19,7 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-INTEL_VERSION="2021.3.0"
+INTEL_VERSION="2022.1.2"
 
 INTEL_PATH="/opt/intel/oneapi"
 
