@@ -20,7 +20,7 @@ set -e
 MODULES_PATH="/usr/share/Modules/modulefiles"
 HDF5_VERSION="1.10.6"
 
-HDF5_URL="https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git"
+HDF5_URL="https://github.com/HDFGroup/hdf5.git"
 
 ZLIB_VERSION="1.2.11"
 ZLIB_PATH="/opt/zlib/${ZLIB_VERSION}"
