@@ -25,7 +25,8 @@ HDF5_URL="https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git"
 ZLIB_VERSION="1.2.11"
 ZLIB_PATH="/opt/zlib/${ZLIB_VERSION}"
 
-ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.2.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.3.0;openmpi/4.1.0"
+
 
 yum install -y \
     environment-modules \

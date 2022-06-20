@@ -19,7 +19,7 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-GCC_VERSION=10.2.0
+GCC_VERSION=10.3.0
 GCC_PATH="/opt/gcc/${GCC_VERSION}"
 
 # Directory used for installation

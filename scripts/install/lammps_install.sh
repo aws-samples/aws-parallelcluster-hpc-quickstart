@@ -55,7 +55,8 @@ done
 LAMMPS_URL=https://github.com/lammps/lammps.git
 MODULES_PATH="/usr/share/Modules/modulefiles"
 DEPENDS_ON="mkl/2021.3.0"
-ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.2.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.3.0;openmpi/4.1.0"
+
 
 yum install -y \
     environment-modules \
