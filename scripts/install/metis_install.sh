@@ -28,7 +28,7 @@ PACKAGE_ARCHIVE="${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz"
 PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
 PACKAGE_URL="http://glaros.dtc.umn.edu/gkhome/fetch/sw/${PACKAGE_NAME}/${PACKAGE_ARCHIVE}"
 
-ENVIRONMENT="gcc/10.2.0;openmpi/4.1.0"
+ENVIRONMENT="gcc/10.3.0;openmpi/4.1.0"
 
 yum install -y \
     curl-devel \

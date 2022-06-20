@@ -22,7 +22,7 @@ MODULES_PATH="/usr/share/Modules/modulefiles"
 OPEN_MPI_VERSIONS="4.1.0"
 EFA_PATH="/opt/amazon/efa"
 
-COMPILERS="gcc/10.2.0"
+COMPILERS="gcc/10.3.0"
 
 yum install -y \
     hwloc \
