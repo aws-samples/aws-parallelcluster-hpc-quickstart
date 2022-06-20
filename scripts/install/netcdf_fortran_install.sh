@@ -25,7 +25,7 @@ DEPENDS_ON="hdf5-parallel/1.10.6 netcdf-c/4.7.4"
 NETCDF_FORTRAN_ARCHIVE="netcdf-fortran-${NETCDF_FORTRAN_VERSION}.tar.gz"
 NETCDF_FORTRAN_URL="https://codeload.github.com/Unidata/netcdf-fortran/tar.gz/refs/tags/v${NETCDF_FORTRAN_VERSION}"
 
-ENVIRONMENT="intel/2021.3.0;intel/2021.3.0 gcc/10.3.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2022.1.2;intel/2022.1.2 gcc/10.3.0;openmpi/4.1.0"
 
 yum install -y \
     curl-devel \
