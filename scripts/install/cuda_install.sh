@@ -34,13 +34,13 @@ sudo yum install -y nvidia-driver-branch-${CUDA_DRIVER_VERSION} nvidia-fabricman
 sudo systemctl enable nvidia-fabricmanager
 
 # Install Cuda toolkit
-sudo yum install -y --no-upgrade --no-install-recommends cuda-toolkit-${CUDA_TOOLKIT_VERSION}
+sudo yum install -y cuda-toolkit-${CUDA_TOOLKIT_VERSION}
 
 # Enable persistence mode
 sudo nvidia-persistenced
 
 
-$CUDA_TOOLKIT_VERSION=`echo ${CUDA_TOOLKIT_VERSION} | sed 's/-/./g'`
+CUDA_TOOLKIT_VERSION=`echo ${CUDA_TOOLKIT_VERSION} | sed 's/-/./g'`
 
 mkdir -p ${MODULES_PATH}/${PACKAGE_NAME}
 
@@ -54,13 +54,14 @@ proc ModulesHelp { } {
 
 module-whatis "Sets up CUDA toolkit v${CUDA_TOOLKIT_VERSION} in your environment"
 
-setenv CUDA_HOME "${CUDA_TOOLKIT_VERSION}"
+set CUDA_HOME "/usr/local/cuda-${CUDA_TOOLKIT_VERSION}"
+setenv CUDA_HOME "${CUDA_HOME}"
 
-prepend-path PATH "${CUDA_TOOLKIT_VERSION}/bin"
-prepend-path CPATH "${CUDA_TOOLKIT_VERSION}/include"
-prepend-path LD_LIBRARY_PATH "${CUDA_TOOLKIT_VERSION}/lib"
-prepend-path LD_LIBRARY_PATH "${CUDA_TOOLKIT_VERSION}/lib64"
-prepend-path LIBRARY_PATH "${CUDA_TOOLKIT_VERSION}/lib"
-prepend-path LIBRARY_PATH "${CUDA_TOOLKIT_VERSION}/lib64"
-prepend-path MANPATH "${CUDA_TOOLKIT_VERSION}/share/man"
+prepend-path PATH "${CUDA_HOME}/bin"
+prepend-path CPATH "${CUDA_HOME}/include"
+prepend-path LD_LIBRARY_PATH "${CUDA_HOME}/lib"
+prepend-path LD_LIBRARY_PATH "${CUDA_HOME}/lib64"
+prepend-path LIBRARY_PATH "${CUDA_HOME}/lib"
+prepend-path LIBRARY_PATH "${CUDA_HOME}/lib64"
+prepend-path MANPATH "${CUDA_HOME}/share/man"
 EOF
