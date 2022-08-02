@@ -15,7 +15,7 @@ export I_MPI_OFI_PROVIDER=efa
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 module purge
-module load compiler/intel/2022.1.2 mpi/intel/2022.1.2 gromacs/v2021.4-intel-2022.1.2
+module load compiler/intel/2022.2.0 mpi/intel/2022.2.0 gromacs/v2021.4-intel-2022.2.0
 
 cd Gromacs-TestCaseB
 mpirun gmx_mpi mdrun -ntomp $OMP_NUM_THREADS -s benchRIB.tpr -resethway

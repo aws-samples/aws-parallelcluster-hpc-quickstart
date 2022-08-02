@@ -28,7 +28,7 @@ PACKAGE_ARCHIVE="${PACKAGE_NAME}${PACKAGE_VERSION//./_}/${PACKAGE_NAME}-${PACKAG
 PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
 PACKAGE_URL="https://github.com/NCAR/ParallelIO/releases/download/${PACKAGE_ARCHIVE}"
 
-ENVIRONMENT="intel/2022.1.2;intel/2022.1.2 gcc/10.3.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.0"
 
 yum install -y \
     curl-devel \

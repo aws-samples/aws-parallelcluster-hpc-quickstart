@@ -12,7 +12,7 @@ export I_MPI_OFI_LIBRARY_INTERNAL=0
 export I_MPI_OFI_PROVIDER=efa
 
 module purge
-module load compiler/intel/2022.1.2 mpi/intel/2022.1.2 lammps/stable_29Oct2020-intel-2022.1.2
+module load compiler/intel/2022.2.0 mpi/intel/2022.2.0 lammps/stable_29Oct2020-intel-2022.2.0
 
 
 WORK_DIR="/fsx/performance/$SLURM_JOB_NAME_$SLURM_JOB_ID"

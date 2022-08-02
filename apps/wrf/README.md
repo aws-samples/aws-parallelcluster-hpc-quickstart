@@ -85,7 +85,7 @@ export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placeme
 The sample relies on packer to build an AWS Machine Image (AMI) containing an installation of WRF.
 It is compiled and optimized for Intel Xeon Scalable Processor using the following compiler and MPI combination:
 
-- Intel oneAPI compiler and Intel oneAPI MPI 2022.1.2
+- Intel oneAPI compiler and Intel oneAPI MPI 2022.2.0
 - GNU 10.3.0 and Open MPI 4.1.0
 
 The packer scripts are located in the amis folder and are organized by Operating System (OS) such as `\[OS\]-pc-wrf`.
@@ -209,7 +209,7 @@ export I_MPI_OFI_LIBRARY_INTERNAL=0
 export I_MPI_OFI_PROVIDER=efa
 
 module purge
-module load wrf-omp/4.2.2-intel-2022.1.2
+module load wrf-omp/4.2.2-intel-2022.2.0
 
 mpirun wrf.exe
 EOF
