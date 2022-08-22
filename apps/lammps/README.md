@@ -78,7 +78,7 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==3.1.2
+pip3 install aws-parallelcluster==3.2.0
 ```
 
 Set AWS Region
