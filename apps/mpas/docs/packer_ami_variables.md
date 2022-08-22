@@ -18,7 +18,7 @@ Here is a description of the variables and their default value:
 | name                       | Name used as AMI name in the middle              | String  | \[OS\]-base      | no       |
 | instance\_type             | EC2 instance type                                | String  | m5zn.3xlarge     | no       |
 | intel\_serial\_number      | Intel license serial number                      | String  | None             | no       |
-| parallel\_cluster\_version | ParallelCluster version to base AMI from         | String  | 2.11.3           | no       |
+| parallel\_cluster\_version | ParallelCluster version to base AMI from         | String  | 3.2.0            | no       |
 | public\_ip                 | Assign an elastic public IP                      | Boolean | True             | no       |
 | ssh\_interface             | SSH interface either SSH or Session Manager      | String  | session\_manager | no       |
 | state                      | AMI state: active, deprecated, obsolete          | String  | active           | no       |

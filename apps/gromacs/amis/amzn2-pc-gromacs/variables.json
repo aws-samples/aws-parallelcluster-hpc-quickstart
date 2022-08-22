@@ -1,6 +1,6 @@
 {
   "aws_region": "us-east-1",
-  "parallel_cluster_version": "3.1.2",
+  "parallel_cluster_version": "3.2.0",
   "application_name": "gromacs",
   "application_version": "v2021.4",
   "intel_serial_number": "",
