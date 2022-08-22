@@ -19,6 +19,8 @@ The following quickstart are provided for the following applications:
 - Weather Simulation
   - [MPAS](<apps/mpas/README.md>)
   - [WRF v4](<apps/wrf/README.md>)
+- Computational Fluid Dynamics (CFD)
+  - [OpenFOAM](<apps/openfoam/README.md>)
 
 # Repository Structure
 
