@@ -90,6 +90,7 @@ module-whatis "Sets up Open MPI v${OPEN_MPI_VERSION} in your environment"
 prepend-path PATH "${OPEN_MPI_INSTALL_PATH}/bin"
 prepend-path CPATH "${OPEN_MPI_INSTALL_PATH}/include"
 prepend-path LD_LIBRARY_PATH "${OPEN_MPI_INSTALL_PATH}/lib"
+prepend-path LIBRARY_PATH "${OPEN_MPI_INSTALL_PATH}/lib"
 prepend-path MANPATH "${OPEN_MPI_INSTALL_PATH}/share/man"
 
 EOF
