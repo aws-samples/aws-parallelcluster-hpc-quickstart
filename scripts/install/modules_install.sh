@@ -43,7 +43,10 @@ WORK_DIR=$(mktemp -d /tmp/modules.XXXXXXXXX)
 cd ${WORK_DIR}
 
 # Saving current modules
-cp ${MODULES_PATH}/../init/.modulespath ${WORK_DIR}/
+if [ -f ${MODULES_PATH}/../init/.modulespath ]; then
+    cp ${MODULES_PATH}/../init/.modulespath ${WORK_DIR}/
+fi
+
 
 # Download modules
 curl -LOJ https://github.com/cea-hpc/modules/releases/download/v${MODULES_VERSION}/modules-${MODULES_VERSION}.tar.gz
@@ -56,7 +59,10 @@ make
 make install
 
 # Restore modules
-cp ${WORK_DIR}/.modulespath ${MODULES_PATH}/../init/.modulespath
+if [ -f ${WORK_DIR}/.modulespath ]; then
+    cp ${WORK_DIR}/.modulespath ${MODULES_PATH}/../init/.modulespath
+fi
+
 
 # Delete work_dir
 cd
