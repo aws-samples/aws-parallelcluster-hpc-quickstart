@@ -36,8 +36,8 @@ echo "[INFO] Deleting SSH Key Pair = ${SSH_KEY_NAME}"
 aws ec2 delete-key-pair --key-name ${SSH_KEY_NAME} --region ${AWS_REGION}
 
 # Delete OpenFOAM Image(s) and associated snapshot(s)
-OPENFOAM_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*-amzn2-parallelcluster-*-openfoam*" --output text --region ${AWS_REGION})
+OPENFOAM_AMIS=$(aws ec2 describe-images --owners self --query 'Images[*].ImageId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-*-openfoam*" --output text --region ${AWS_REGION})
 echo "[INFO] Deleting OpenFOAM AMIs = ${OPENFOAM_AMIS}"
-OPENFOAM_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*-amzn2-parallelcluster-*-openfoam*" --output text --region ${AWS_REGION})
+OPENFOAM_SNAPSHOTS=$(aws ec2 describe-images --owners self --query 'Images[*].BlockDeviceMappings[0].Ebs.SnapshotId' --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-*-openfoam*" --output text --region ${AWS_REGION})
 for i in ${OPENFOAM_AMIS}; do aws ec2 deregister-image --image-id ${i} --region ${AWS_REGION} ; done
 for i in ${OPENFOAM_SNAPSHOTS}; do aws ec2 delete-snapshot --snapshot-id ${i} --region ${AWS_REGION}; done

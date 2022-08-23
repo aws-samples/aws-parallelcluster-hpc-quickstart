@@ -101,19 +101,20 @@ Navigate to the `amis` folder, choose the desired OS, build the AMI using packer
 You can accomplish this by typing:
 
 ```bash
-# Set OS for OpenFOAM to be amzn2
+# Set OS for OpenFOAM to be amzn2 or CentOS 7
+COMPANY_NAME=AnyCompany
 OS_TYPE=amzn2
 
 # Go to the corresponding folder
-cd amis/amzn2-pc-openfoam
+cd amis/${OS_TYPE}-pc-openfoam
 
 # Build the ami using packer
 packer build \
     -var-file variables.json \
     -var aws_region=${AWS_REGION} \
     -var parallel_cluster_version=`pcluster version | jq -r '.version'` \
-    -var company_name=[COMPANY_NAME] \
-    amzn2-pc-openfoam.json
+    -var company_name=${COMPANY_NAME} \
+    ${OS_TYPE}-pc-openfoam.json
 ```
 
 ### Deploy AWS ParallelCluster with OpenFOAM

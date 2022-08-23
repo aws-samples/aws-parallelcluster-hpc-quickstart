@@ -1,0 +1,148 @@
+{
+
+  "min_packer_version": "1.6.0",
+  "variables": {
+    "env": "dev",
+    "state": "current"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "instance_type": "{{user `instance_type`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "aws-parallelcluster-{{user `parallel_cluster_version`}}-centos7-*",
+          "architecture": "x86_64",
+          "root-device-type": "ebs"
+        },
+        "owners": [
+          "amazon"
+        ],
+        "most_recent": true
+      },
+      "ssh_username": "centos",
+      "ami_name": "{{user `company_name`}}-{{user `name`}}-{{ user `parallel_cluster_version`}}-{{user `application_name`}}-{{user `application_version`}}-{{isotime \"20060102150405\" | clean_resource_name}}",
+      "shutdown_behavior": "terminate",
+      "associate_public_ip_address": "{{user `public_ip`}}",
+      "encrypt_boot": "{{user `encrypt_boot`}}",
+      "tags": {
+          "Name": "{{user `company_name`}}-{{user `name`}}-{{user `application_name`}}",
+          "State": "{{user `state`}}",
+          "Env": "{{user `env`}}",
+          "OS": "CentOS 7",
+          "Source_AMI": "{{ .SourceAMI }}",
+          "parallelcluster:version": "{{ user `parallel_cluster_version`}}",
+          "parallelcluster:build_status": "available",
+          "parallelcluster:os": "centos7"
+      },
+      "ssh_interface": "{{user `ssh_interface`}}",
+      "communicator": "ssh",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_size": 40,
+          "delete_on_termination": true
+        }
+      ],
+      "temporary_iam_instance_profile_policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ssm:DescribeAssociation",
+              "ssm:GetDeployablePatchSnapshotForInstance",
+              "ssm:GetDocument",
+              "ssm:DescribeDocument",
+              "ssm:GetManifest",
+              "ssm:GetParameter",
+              "ssm:GetParameters",
+              "ssm:ListAssociations",
+              "ssm:ListInstanceAssociations",
+              "ssm:PutInventory",
+              "ssm:PutComplianceItems",
+              "ssm:PutConfigurePackageResult",
+              "ssm:UpdateAssociationStatus",
+              "ssm:UpdateInstanceAssociationStatus",
+              "ssm:UpdateInstanceInformation"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ssmmessages:CreateControlChannel",
+              "ssmmessages:CreateDataChannel",
+              "ssmmessages:OpenControlChannel",
+              "ssmmessages:OpenDataChannel"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ec2messages:AcknowledgeMessage",
+              "ec2messages:DeleteMessage",
+              "ec2messages:FailMessage",
+              "ec2messages:GetEndpoint",
+              "ec2messages:GetMessages",
+              "ec2messages:SendReply"
+            ],
+            "Resource": "*"
+          }
+        ]
+      },
+      "pause_before_ssm": "30s"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum -y update --security",
+        "sudo yum remove -y dpkg"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "script": "../../../../scripts/install/modules_install.sh"
+    },
+    {
+      "type": "file",
+      "source": "../../../../scripts/install/intel_oneapi_compiler_mpi_install.sh",
+      "destination": "/tmp/intel_oneapi_compiler_mpi_install.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo chmod u+x /tmp/intel_oneapi_compiler_mpi_install.sh",
+        "sudo /tmp/intel_oneapi_compiler_mpi_install.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "script": "../../../../scripts/install/gcc_install.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "script": "../../../../scripts/install/openmpi_install.sh"
+    },
+    {
+      "type": "file",
+      "source": "../../../../scripts/install/openfoam_install.sh",
+      "destination": "/tmp/openfoam_install.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo chmod u+x /tmp/openfoam_install.sh",
+        "sudo /tmp/openfoam_install.sh -v {{user `application_version`}}"
+      ]
+    }
+  ]
+}
