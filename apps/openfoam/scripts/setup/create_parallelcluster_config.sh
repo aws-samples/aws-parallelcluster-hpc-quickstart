@@ -108,7 +108,7 @@ PCLUSTER_VERSION=`pcluster version | yq '.version'`
 # Retrieve OpenFOAM Image ID
 export OPENFOAM_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-amzn2-parallelcluster-${PCLUSTER_VERSION}-openfoam-*" \
+    --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-openfoam-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
