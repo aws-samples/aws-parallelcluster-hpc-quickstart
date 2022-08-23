@@ -27,11 +27,21 @@ CUDA_TOOLKIT_VERSION="11-6"
 sudo amazon-linux-extras install -y epel
 
 sudo yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
-sudo yum update
 
-# Install Nvidia Fabric Manager
+if [ -f /usr/bin/nvidia-uninstall ]; then
+   /usr/bin/nvidia-uninstall --ui=none --no-questions --silent
+fi
+
+# Delete versionlock
+sudo yum versionlock delete nvidia-fabric-manager
+
+# Remove existing Nvidia Fabric Manager
+sudo yum erase -y nvidia-fabricmanager
+
+# Install Nvidia Driver and Fabric Manager
 sudo yum install -y nvidia-driver-branch-${CUDA_DRIVER_VERSION} nvidia-fabricmanager-${CUDA_DRIVER_VERSION}
 sudo systemctl enable nvidia-fabricmanager
+sudo systemctl start nvidia-fabricmanager
 
 # Install Cuda toolkit
 sudo yum install -y cuda-toolkit-${CUDA_TOOLKIT_VERSION}
