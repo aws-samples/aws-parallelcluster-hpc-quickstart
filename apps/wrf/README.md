@@ -173,7 +173,6 @@ cp /opt/wrf-omp/src/run/{\
         GENPARM.TBL,\
         HLC.TBL,\
         LANDUSE.TBL,\
-        MPTABLE.TBL,\
         RRTM_DATA,\
         RRTM_DATA_DBL,\
         RRTMG_LW_DATA,\
