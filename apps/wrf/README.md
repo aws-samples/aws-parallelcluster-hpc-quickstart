@@ -169,10 +169,10 @@ tar -xzf wrf_simulation_CONUS12km.tar.gz
 cd /fsx/conus_12km
 
 cp /opt/wrf-omp/src/run/{\
+        CAMtr_volume_mixing_ratio,\
         GENPARM.TBL,\
         HLC.TBL,\
         LANDUSE.TBL,\
-        MPTABLE.TBL,\
         RRTM_DATA,\
         RRTM_DATA_DBL,\
         RRTMG_LW_DATA,\
@@ -209,7 +209,7 @@ export I_MPI_OFI_LIBRARY_INTERNAL=0
 export I_MPI_OFI_PROVIDER=efa
 
 module purge
-module load wrf-omp/4.2.2-intel-2022.2.0
+module load wrf-omp/4.4.1-intel-2022.2.0
 
 mpirun wrf.exe
 EOF

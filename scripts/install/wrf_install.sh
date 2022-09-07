@@ -46,14 +46,14 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            WRF_VERSION="4.2.2"
+            WRF_VERSION="4.4.1"
             ;;
     esac
 done
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
+DEPENDS_ON="hdf5-parallel/1.12.1 pnetcdf/1.12.3 netcdf-c/4.9.0 netcdf-fortran/4.6.0"
 
 WRF_URL="https://github.com/wrf-model/WRF.git"
 

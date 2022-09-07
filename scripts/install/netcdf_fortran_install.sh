@@ -19,8 +19,8 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-NETCDF_FORTRAN_VERSION="4.5.3"
-DEPENDS_ON="hdf5-parallel/1.10.6 netcdf-c/4.7.4"
+NETCDF_FORTRAN_VERSION="4.6.0"
+DEPENDS_ON="hdf5-parallel/1.12.1 netcdf-c/4.9.0"
 
 NETCDF_FORTRAN_ARCHIVE="netcdf-fortran-${NETCDF_FORTRAN_VERSION}.tar.gz"
 NETCDF_FORTRAN_URL="https://codeload.github.com/Unidata/netcdf-fortran/tar.gz/refs/tags/v${NETCDF_FORTRAN_VERSION}"

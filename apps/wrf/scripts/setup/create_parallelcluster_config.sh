@@ -109,7 +109,7 @@ PCLUSTER_VERSION=`pcluster version | yq '.version'`
 # Retrieve WRF Image ID
 export WRF_AMI=`aws ec2 describe-images --owners self \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
-    --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf-4.2.2-*" \
+    --filters "Name=name,Values=*-${OS_TYPE}-parallelcluster-${PCLUSTER_VERSION}-wrf-4.4.1-*" \
     --region ${AWS_REGION} \
     | jq -r 'sort_by(.CreationDate)[-1] | .ImageId'`
 
