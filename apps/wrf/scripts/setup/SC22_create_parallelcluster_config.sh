@@ -82,10 +82,6 @@ AZ_W_INSTANCES=`aws ec2 describe-instance-type-offerings --location-type "availa
     --query InstanceTypeOfferings[].Location \
     --region ${AWS_REGION} | jq -r ".[]" | sort`
 
-AZ_W_INSTANCES=`aws ec2 describe-availability-zones --region eu-west-1 \
-    --filters Name=zone-id,Values=euw1-az1 \
-    --query AvailabilityZones[].ZoneName | jq -r '.[]'`
-
 INSTANCE_TYPE_COUNT=`echo ${INSTANCES} | awk -F "," '{print NF-1}'`
 AZ_COUNT=`echo ${AZ_W_INSTANCES} | tr -s ',' ' ' | wc -w`
 
