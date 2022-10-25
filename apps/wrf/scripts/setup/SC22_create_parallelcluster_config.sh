@@ -90,7 +90,7 @@ else
 fi
 
 
-export CUSTOM_AMI=`aws ec2 describe-images --owners 280472923663 \
+export CUSTOM_AMI=`aws ec2 describe-images --owners 346225319837 \
     --query 'Images[*].{ImageId:ImageId,CreationDate:CreationDate}' \
     --filters "Name=name,Values=*-amzn2-parallelcluster-3.2.0-wrf-4.4.1-*" \
     --region ${AWS_REGION} \
