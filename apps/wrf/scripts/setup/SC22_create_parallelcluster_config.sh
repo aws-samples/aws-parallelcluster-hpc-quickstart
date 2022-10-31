@@ -30,7 +30,7 @@ echo "[INFO] AWS_REGION = ${AWS_REGION}"
 # Define Instances seperated by ','.
 if [ -z ${INSTANCES} ]; then
     echo "[WARNING] INSTANCES environment variable is not set, automatically set to c5n.18xlarge,m5.2xlarge."
-    export INSTANCES=c5n.18xlarge,m5.2xlarge
+    export INSTANCES=hpc6a.48xlarge,m5.2xlarge
 fi
 echo "export INSTANCES=${INSTANCES}" >> env_vars
 echo "[INFO] INSTANCES = ${INSTANCES}"
@@ -77,34 +77,9 @@ fi
 
 
 # Find in which Availability Zone Amazon EC2 instances are available.
-AZ_W_INSTANCES=`aws ec2 describe-instance-type-offerings --location-type "availability-zone" \
-    --filters Name=instance-type,Values=${INSTANCES} \
-    --query InstanceTypeOfferings[].Location \
-    --region ${AWS_REGION} | jq -r ".[]" | sort`
-
-INSTANCE_TYPE_COUNT=`echo ${INSTANCES} | awk -F "," '{print NF-1}'`
-AZ_COUNT=`echo ${AZ_W_INSTANCES} | tr -s ',' ' ' | wc -w`
-
-if [ ${INSTANCE_TYPE_COUNT} -gt 0 ] && [ ${AZ_COUNT} -gt 1  ]; then
-    AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' '\n' | uniq -d`
-fi
-AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' ',' | sed 's%,$%%g'`
-
-
-if [[ -z $AZ_W_INSTANCES ]]; then
-    echo "[ERROR] failed to retrieve Availability Zone"
-    return 1
-fi
-
-AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
-
-# Set a subnet id by finding which subnet of the VPC is corresponding to the Availability Zone
-# where EC2 instance are available.
-export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
-    --filters Name=vpc-id,Values=${VPC_ID} \
-    Name=availability-zone,Values=${AZ_W_INSTANCES} \
-    --region ${AWS_REGION} \
-    | jq -r .[$(python3 -S -c "import random; print(random.randrange(${AZ_COUNT}))")]`
+export SUBNET_ID=`aws ec2 describe-subnets \
+                 --query "Subnets[?AvailabilityZoneId == 'use2-az2'].SubnetId" \
+                  | jq -r '.[]'`
 
 if [[ ! -z $SUBNET_ID ]]; then
     echo "export SUBNET_ID=${SUBNET_ID}" >> env_vars
