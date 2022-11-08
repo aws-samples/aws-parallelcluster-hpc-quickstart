@@ -30,7 +30,7 @@ echo "[INFO] AWS_REGION = ${AWS_REGION}"
 # Define Instances seperated by ','.
 if [ -z ${INSTANCES} ]; then
     echo "[WARNING] INSTANCES environment variable is not set, automatically set to c5n.18xlarge,m5.2xlarge."
-    export INSTANCES=hpc6a.48xlarge,m5.2xlarge
+    export INSTANCES=c5.18xlarge,c5.24xlarge
 fi
 echo "export INSTANCES=${INSTANCES}" >> env_vars
 echo "[INFO] INSTANCES = ${INSTANCES}"
@@ -75,11 +75,16 @@ else
     return 1
 fi
 
+AZ_IDS=use1-az4,use1-az5,use1-az6
+AZ_COUNT=`echo $AZ_IDS | tr -s ',' ' ' | wc -w`
 
-# Find in which Availability Zone Amazon EC2 instances are available.
-export SUBNET_ID=`aws ec2 describe-subnets \
-                 --query "Subnets[?AvailabilityZoneId == 'use2-az2'].SubnetId" \
-                  | jq -r '.[]'`
+# Set a subnet id by finding which subnet of the VPC is corresponding to the Availability Zone
+# where EC2 instance are available.
+export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
+    --filters Name=vpc-id,Values=${VPC_ID} \
+    Name=availability-zone-id,Values=${AZ_IDS} \
+    --region ${AWS_REGION} \
+    | jq -r .[$(python3 -S -c "import random; print(random.randrange(${AZ_COUNT}))")]`
 
 if [[ ! -z $SUBNET_ID ]]; then
     echo "export SUBNET_ID=${SUBNET_ID}" >> env_vars
