@@ -57,7 +57,7 @@ SCOTCH_URL="https://gitlab.inria.fr/scotch/scotch.git"
 SCOTCH_LOCAL_VERSION="6.0.9"
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 
 yum install -y \
