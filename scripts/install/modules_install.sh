@@ -54,13 +54,20 @@ tar -xvzf modules-${MODULES_VERSION}.tar.gz
 cd modules-${MODULES_VERSION}
 
 # Install Environment modules
-./configure --prefix=${MODULES_INSTALL_PATH} --modulefilesdir=${MODULES_PATH}
+./configure --prefix=${MODULES_INSTALL_PATH} \
+    --modulefilesdir=${MODULES_PATH} \
+    --enable-modulespath
 make
 make install
 
 # Restore modules
 if [ -f ${WORK_DIR}/.modulespath ]; then
     cp ${WORK_DIR}/.modulespath ${MODULES_PATH}/../init/.modulespath
+fi
+
+# Add modules to environment
+if [ ! -f /etc/profile.d/modules.sh ]; then
+    ln -s ${MODULES_PATH}/../init/profile.sh /etc/profile.d/modules.sh
 fi
 
 
