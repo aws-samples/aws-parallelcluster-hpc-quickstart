@@ -19,7 +19,7 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-OPEN_MPI_VERSIONS="4.1.0"
+OPEN_MPI_VERSIONS="4.1.4"
 EFA_PATH="/opt/amazon/efa"
 
 COMPILERS="gcc/10.3.0"
