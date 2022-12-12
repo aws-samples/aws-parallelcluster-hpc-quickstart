@@ -73,52 +73,17 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
-# Add modules
-add_dependent_modules() {
-    if [[ ! -z ${MODULE_DEPENDENCIES} ]]; then
-        MODULE_DEPENDENCIES+=" "
-    fi
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-    MODULE_DEPENDENCIES+="$1"
-}
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
 
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    MODULE_DEPENDENCIES=""
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
-
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-    add_dependent_modules "compiler/${COMPILER}"
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-        add_dependent_modules "mpi/${MPI}"
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-        add_dependent_modules "mpi/${MPI}-${compiler_name}-${compiler_version}"
-    fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
-    # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t wrf_XXXXXXXXXXXX`
-    cd ${WORKDIR}
+    load_environment $comp_mpi "$DEPENDS_ON"
 
     WRF_PATH="/opt/wrf-omp/${WRF_VERSION}/${compiler_name}/${compiler_version}"
 
@@ -129,13 +94,9 @@ do
         continue
     fi
 
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        module load ${i}-${compiler_name}-${compiler_version}
-        add_dependent_modules "${i}-${compiler_name}-${compiler_version}"
-    done
-
+    # Create build directory in /tmp
+    WORKDIR=`mktemp -d -p /tmp -t wrf_XXXXXXXXXXXX`
+    cd ${WORKDIR}
 
     # Retreive wrf from git repo
     git clone -b v"${WRF_VERSION}" ${WRF_URL}
