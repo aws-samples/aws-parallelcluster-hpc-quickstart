@@ -57,7 +57,7 @@ DEPENDS_ON="hdf5-parallel/1.12.1 pnetcdf/1.12.3 netcdf-c/4.9.0 netcdf-fortran/4.
 
 WRF_URL="https://github.com/wrf-model/WRF.git"
 
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 yum install -y \
     environment-modules \

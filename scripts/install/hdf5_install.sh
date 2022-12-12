@@ -25,7 +25,7 @@ HDF5_URL="https://github.com/HDFGroup/hdf5.git"
 ZLIB_VERSION="1.2.11"
 ZLIB_PATH="/opt/zlib/${ZLIB_VERSION}"
 
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.0"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 yum install -y \
     environment-modules \
