@@ -18,7 +18,7 @@
 set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
-HDF5_VERSION="1.12.1"
+HDF5_VERSION="1.10.6"
 
 HDF5_URL="https://github.com/HDFGroup/hdf5.git"
 

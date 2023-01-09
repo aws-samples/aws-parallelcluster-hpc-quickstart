@@ -10,7 +10,7 @@ Here is a description of the variables and their default value:
 | Name                       | Description                                      | Type    | Default          | Required |
 | -------------------------- | ------------------------------------------------ | ------- | ---------------- | -------- |
 | application\_name          | Application name                                 | String  | wrf              | no       |
-| application\_version       | WRF version                                      | String  | 4.4.1            | no       |
+| application\_version       | WRF version                                      | String  | 4.2.2            | no       |
 | aws\_region                | AWS Region where packer will create the instance | String  | us-east-1        | no       |
 | company\_name              | Company Name used as AMI name prefix             | String  | None             | yes      |
 | encrypt\_boot              | Encrypt snaphot and AMI                          | Boolean | False            | no       |

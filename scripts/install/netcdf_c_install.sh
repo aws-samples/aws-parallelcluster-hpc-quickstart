@@ -19,8 +19,8 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-NETCDF_C_VERSION="4.9.0"
-DEPENDS_ON="hdf5-parallel/1.12.1 pnetcdf/1.12.3"
+NETCDF_C_VERSION="4.7.4"
+DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2"
 
 NETCDF_C_ARCHIVE="netcdf-c-${NETCDF_C_VERSION}.tar.gz"
 NETCDF_C_URL="https://codeload.github.com/Unidata/netcdf-c/tar.gz/refs/tags/v${NETCDF_C_VERSION}"
