@@ -19,7 +19,7 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-PNETCDF_VERSION="1.12.3"
+PNETCDF_VERSION="1.12.2"
 
 PNETCDF_ARCHIVE="pnetcdf-${PNETCDF_VERSION}.tar.gz"
 PNETCDF_URL="https://parallel-netcdf.github.io/Release/${PNETCDF_ARCHIVE}"
