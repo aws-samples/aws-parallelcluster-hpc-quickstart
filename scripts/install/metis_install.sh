@@ -22,11 +22,11 @@ MODULES_PATH="/usr/share/Modules/modulefiles"
 
 PACKAGE_NAME="metis"
 
-PACKAGE_VERSION="5.1.0"
+PACKAGE_VERSION="5.2.1"
 
 PACKAGE_ARCHIVE="${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz"
 PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
-PACKAGE_URL="http://glaros.dtc.umn.edu/gkhome/fetch/sw/${PACKAGE_NAME}/${PACKAGE_ARCHIVE}"
+PACKAGE_URL="https://codeload.github.com/KarypisLab/METIS/tar.gz/refs/tags/v${PACKAGE_VERSION}"
 
 ENVIRONMENT="gcc/10.3.0;openmpi/4.1.4"
 
@@ -90,17 +90,22 @@ do
     # Retrieve archive
     if [ ! -f ${PACKAGE_TAR} ]; then
         echo "Download archive"
-        wget ${PACKAGE_URL}
+        curl -o ${PACKAGE_ARCHIVE} ${PACKAGE_URL}
     fi
 
     # Check if archive already exist untar
     if [ ! -d ${PACKAGE_TAR} ]; then
         echo "Extract archive"
-        tar xzf ${PACKAGE_TAR}
+        mkdir -p ${PACKAGE_NAME}-${PACKAGE_VERSION} && tar xzf ${PACKAGE_TAR}  -C ${PACKAGE_NAME}-${PACKAGE_VERSION} --strip-components 1
     fi
 
-    cd ${PACKAGE_NAME}-${PACKAGE_VERSION}
 
+    # Download and Install GKlib for metis
+    git clone https://github.com/KarypisLab/GKlib.git ${WORKDIR}/GKlib && cd ${WORKDIR}/GKlib
+    make config prefix=${PACKAGE_PATH}
+    make install
+
+    cd ${WORKDIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}
     make config prefix=${PACKAGE_PATH}
     make install
 

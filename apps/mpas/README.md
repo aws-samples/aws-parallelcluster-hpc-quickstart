@@ -175,7 +175,7 @@ export I_MPI_OFI_LIBRARY_INTERNAL=0
 export I_MPI_OFI_PROVIDER=efa
 
 module purge
-module load metis/5.1.0-gcc-10.3.0
+module load metis/5.2.1-gcc-10.3.0
 module load mpas-omp/7.1-intel-2022.2.0
 
 #Create mesh decomposition for the specified MPI ranks
