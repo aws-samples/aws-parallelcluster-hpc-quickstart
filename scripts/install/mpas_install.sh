@@ -29,11 +29,18 @@ or when FILE is -, read standard input.
 EOF
 }
 
+show_default() {
+    MPAS_VERSION=${MPAS_DEFAULT_VERSION}
+    cat << EOF
+No MPAS Version specified
+Using default: ${MPAS_DEFAULT_VERSION}
+EOF
+}
+
 # Parse options
 OPTIND=1 # Reset if getopts used previously
 if (($# == 0)); then
-    show_help
-    exit 2
+    show_default
 fi
 
 while getopts ":v:h:" opt; do
@@ -46,7 +53,7 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            MPAS_VERSION="7.1"
+            MPAS_VERSION=${MPAS_DEFAULT_VERSION}
             ;;
     esac
 done

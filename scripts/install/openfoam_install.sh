@@ -16,6 +16,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+OPENFOAM_DEFAULT_VERSION="2012"
+OPENFOAM_URL="https://develop.openfoam.com/Development/openfoam.git"
+OPENFOAM_THIRDPARY_URL="https://develop.openfoam.com/Development/ThirdParty-common.git"
+SCOTCH_URL="https://gitlab.inria.fr/scotch/scotch.git"
+# Have to use a different variable name than SCOTCH_VERSION that is used internally by OpenFOAM.
+SCOTCH_LOCAL_VERSION="6.0.9"
+
+MODULES_PATH="/usr/share/Modules/modulefiles"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+
 # Help Options
 show_help() {
     cat << EOF
@@ -24,15 +35,22 @@ Do stuff with FILE and write the result to standard output. With no FILE
 or when FILE is -, read standard input.
 
     -h                   display this help and exit
-    -v OPENFOAM_VERSION    OpenFOAM version
+    -v OPENFOAM_VERSION  OpenFOAM version
+EOF
+}
+
+show_default() {
+    OPENFOAM_VERSION=${OPENFOAM_DEFAULT_VERSION}
+    cat << EOF
+No OpenFOAM Version specified
+Using default: ${OPENFOAM_VERSION}
 EOF
 }
 
 # Parse options
 OPTIND=1 # Reset if getopts used previously
 if (($# == 0)); then
-    show_help
-    exit 2
+    show_default
 fi
 
 while getopts ":v:h:" opt; do
@@ -45,19 +63,10 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            OPENFOAM_VERSION="2012"
+            OPENFOAM_VERSION=${OPENFOAM_DEFAULT_VERSION}
             ;;
     esac
 done
-
-OPENFOAM_URL=https://develop.openfoam.com/Development/openfoam.git
-OPENFOAM_THIRDPARY_URL="https://develop.openfoam.com/Development/ThirdParty-common.git"
-SCOTCH_URL="https://gitlab.inria.fr/scotch/scotch.git"
-# Have to use a different variable name than SCOTCH_VERSION that is used internally by OpenFOAM.
-SCOTCH_LOCAL_VERSION="6.0.9"
-
-MODULES_PATH="/usr/share/Modules/modulefiles"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 
 yum install -y \
@@ -78,54 +87,19 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
-# Add modules
-add_dependent_modules() {
-    if [[ ! -z ${MODULE_DEPENDENCIES} ]]; then
-        MODULE_DEPENDENCIES+=" "
-    fi
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-    MODULE_DEPENDENCIES+="$1"
-}
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
 
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    MODULE_DEPENDENCIES=""
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
-
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-    add_dependent_modules "compiler/${COMPILER}"
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-        add_dependent_modules "mpi/${MPI}"
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-        add_dependent_modules "mpi/${MPI}-${compiler_name}-${compiler_version}"
-    fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
-    # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t OPENFOAM_XXXXXXXXXX`
-    cd ${WORKDIR}
-
+    load_environment $comp_mpi "$DEPENDS_ON"
     OPENFOAM_PATH="/opt/openfoam/${OPENFOAM_VERSION}/${compiler_name}/${compiler_version}"
+
     # Check if already installed
     if [ -d ${OPENFOAM_PATH} ];
     then
@@ -133,18 +107,9 @@ do
         continue
     fi
 
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        if [[ "$i" == "mkl"* ]]; then
-            module load ${i}
-            add_dependent_modules "${i}"
-        else
-            module load ${i}-${compiler_name}-${compiler_version}
-            add_dependent_modules "${i}-${compiler_name}-${compiler_version}"
-        fi
-    done
-
+    # Create build directory in /tmp
+    WORKDIR=`mktemp -d -p /tmp -t OPENFOAM_XXXXXXXXXX`
+    cd ${WORKDIR}
 
     echo "Cloning OpenFOAM ${OPENFOAM_VERSION} branch"
     git clone -b OpenFOAM-v${OPENFOAM_VERSION} ${OPENFOAM_URL} ${OPENFOAM_PATH}
