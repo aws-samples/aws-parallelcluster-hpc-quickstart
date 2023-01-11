@@ -25,7 +25,48 @@ HDF5_URL="https://github.com/HDFGroup/hdf5.git"
 ZLIB_VERSION="1.2.11"
 ZLIB_PATH="/opt/zlib/${ZLIB_VERSION}"
 
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+
+show_help() {
+    cat << EOF
+Usage: ${0##*/} [-hv]
+
+    -h                  display this help and exit
+    -v HDF5_VERSION    Intel oneAPI Version
+EOF
+}
+
+show_default() {
+    cat << EOF
+No HDF5 Version specified
+Using default: ${HDF5_VERSION}
+EOF
+}
+
+# Parse options
+OPTIND=1 # Reset if getopts used previously
+if (($# == 0)); then
+    show_default
+fi
+
+while getopts ":v:h:c:" opt; do
+    case ${opt} in
+        v )
+            HDF5_VERSION=$OPTARG
+            ;;
+        c )
+            ENVIRONMENT=$OPTARG
+            ;;
+        h )
+            show_help
+            exit 0
+            ;;
+        * )
+            show_help
+            exit 0
+            ;;
+    esac
+done
+
 
 yum install -y \
     environment-modules \
@@ -41,35 +82,17 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
+
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
-
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-    fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
+    load_environment $comp_mpi "$DEPENDS_ON"
 
     HDF5_PATH="/opt/hdf5-parallel/${HDF5_VERSION}/${compiler_name}/${compiler_version}"
 
