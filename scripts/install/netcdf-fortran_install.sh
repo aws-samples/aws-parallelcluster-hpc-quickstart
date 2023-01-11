@@ -25,7 +25,46 @@ DEPENDS_ON="hdf5-parallel/1.10.6 netcdf-c/4.7.4"
 NETCDF_FORTRAN_ARCHIVE="netcdf-fortran-${NETCDF_FORTRAN_VERSION}.tar.gz"
 NETCDF_FORTRAN_URL="https://codeload.github.com/Unidata/netcdf-fortran/tar.gz/refs/tags/v${NETCDF_FORTRAN_VERSION}"
 
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+show_help() {
+    cat << EOF
+Usage: ${0##*/} [-hv]
+
+    -h                  display this help and exit
+    -v NETCDF_FORTRAN_VERSION    Intel oneAPI Version
+EOF
+}
+
+show_default() {
+    cat << EOF
+No NETCDF_FORTRAN Version specified
+Using default: ${NETCDF_FORTRAN_VERSION}
+EOF
+}
+
+# Parse options
+OPTIND=1 # Reset if getopts used previously
+if (($# == 0)); then
+    show_default
+fi
+
+while getopts ":v:h:c:" opt; do
+    case ${opt} in
+        v )
+            NETCDF_FORTRAN_VERSION=$OPTARG
+            ;;
+        c )
+            ENVIRONMENT=$OPTARG
+            ;;
+        h )
+            show_help
+            exit 0
+            ;;
+        * )
+            show_help
+            exit 0
+            ;;
+    esac
+done
 
 yum install -y \
     curl-devel \
@@ -42,39 +81,17 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
+
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
-
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-    fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
-    # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t netcdf_fortran_XXXXXXXXXXXX`
-    cd ${WORKDIR}
+    load_environment $comp_mpi "$DEPENDS_ON"
 
     NETCDF_FORTRAN_PATH="/opt/netcdf-fortran/${NETCDF_FORTRAN_VERSION}/${compiler_name}/${compiler_version}"
 
@@ -85,11 +102,9 @@ do
         continue
     fi
 
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        module load ${i}-${compiler_name}-${compiler_version}
-    done
+    # Create build directory in /tmp
+    WORKDIR=`mktemp -d -p /tmp -t netcdf_fortran_XXXXXXXXXXXX`
+    cd ${WORKDIR}
 
     # Retrieve archive
     if [ ! -f ${NETCDF_FORTRAN_ARCHIVE} ]; then
