@@ -28,7 +28,46 @@ PACKAGE_ARCHIVE="${PACKAGE_NAME}${PACKAGE_VERSION//./_}/${PACKAGE_NAME}-${PACKAG
 PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
 PACKAGE_URL="https://github.com/NCAR/ParallelIO/releases/download/${PACKAGE_ARCHIVE}"
 
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+show_help() {
+    cat << EOF
+Usage: ${0##*/} [-hv]
+
+    -h                display this help and exit
+    -v PIO_VERSION    PIO Version
+EOF
+}
+
+show_default() {
+    cat << EOF
+No PIO Version specified
+Using default: ${PIO_VERSION}
+EOF
+}
+
+# Parse options
+OPTIND=1 # Reset if getopts used previously
+if (($# == 0)); then
+    show_default
+fi
+
+while getopts ":v:h:c:" opt; do
+    case ${opt} in
+        v )
+            PIO_VERSION=$OPTARG
+            ;;
+        c )
+            ENVIRONMENT=$OPTARG
+            ;;
+        h )
+            show_help
+            exit 0
+            ;;
+        * )
+            show_help
+            exit 0
+            ;;
+    esac
+done
 
 yum install -y \
     curl-devel \
@@ -44,39 +83,17 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
+
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
-
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-    fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
-    # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t ${PACKAGE_NAME}_XXXXXXXXXXXX`
-    cd ${WORKDIR}
+    load_environment $comp_mpi "$DEPENDS_ON"
 
     PACKAGE_PATH="/opt/${PACKAGE_NAME}/${PACKAGE_VERSION}/${compiler_name}/${compiler_version}"
 
@@ -87,11 +104,10 @@ do
         continue
     fi
 
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        module load ${i}-${compiler_name}-${compiler_version}
-    done
+    # Create build directory in /tmp
+    WORKDIR=`mktemp -d -p /tmp -t ${PACKAGE_NAME}_XXXXXXXXXXXX`
+    cd ${WORKDIR}
+
 
     # Retrieve archive
     if [ ! -f ${PACKAGE_TAR} ]; then
