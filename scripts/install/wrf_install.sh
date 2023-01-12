@@ -17,6 +17,14 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 set -e
 
+WRF_DEFAULT_VERSION="4.2.2"
+WRF_URL="https://github.com/wrf-model/WRF.git"
+
+MODULES_PATH="/usr/share/Modules/modulefiles"
+
+DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+
 # Help Options
 show_help() {
     cat << EOF
@@ -29,12 +37,20 @@ or when FILE is -, read standard input.
 EOF
 }
 
+show_default() {
+    WRF_VERSION=${WRF_DEFAULT_VERSION}
+    cat << EOF
+No WRF Version specified
+Using default: ${WRF_VERSION}
+EOF
+}
+
 # Parse options
 OPTIND=1 # Reset if getopts used previously
 if (($# == 0)); then
-    show_help
-    exit 2
+    show_default
 fi
+
 
 while getopts ":v:h:" opt; do
     case ${opt} in
@@ -46,18 +62,12 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            WRF_VERSION="4.2.2"
+            WRF_VERSION=${WRF_DEFAULT_VERSION}
             ;;
     esac
 done
 
-MODULES_PATH="/usr/share/Modules/modulefiles"
 
-DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
-
-WRF_URL="https://github.com/wrf-model/WRF.git"
-
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 yum install -y \
     environment-modules \
