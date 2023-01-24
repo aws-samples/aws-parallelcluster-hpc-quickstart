@@ -22,7 +22,7 @@ GROMACS_DEFAULT_VERSION="v2021.4"
 
 GROMACS_URL=https://gitlab.com/gromacs/gromacs.git
 MODULES_PATH="/usr/share/Modules/modulefiles"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0"
 
 # Help Options
 show_help() {
