@@ -18,29 +18,27 @@
 set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
+HDF5_VERSION="1.10.6"
 
-PACKAGE_NAME="pio"
+HDF5_URL="https://github.com/HDFGroup/hdf5.git"
 
-PACKAGE_VERSION="2.5.4"
-DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
+ZLIB_VERSION="1.2.11"
+ZLIB_PATH="/opt/zlib/${ZLIB_VERSION}"
 
-PACKAGE_ARCHIVE="${PACKAGE_NAME}${PACKAGE_VERSION//./_}/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz"
-PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
-PACKAGE_URL="https://github.com/NCAR/ParallelIO/releases/download/${PACKAGE_ARCHIVE}"
 
 show_help() {
     cat << EOF
 Usage: ${0##*/} [-hv]
 
-    -h                display this help and exit
-    -v PIO_VERSION    PIO Version
+    -h                  display this help and exit
+    -v HDF5_VERSION    Intel oneAPI Version
 EOF
 }
 
 show_default() {
     cat << EOF
-No PIO Version specified
-Using default: ${PIO_VERSION}
+No HDF5 Version specified
+Using default: ${HDF5_VERSION}
 EOF
 }
 
@@ -53,7 +51,7 @@ fi
 while getopts ":v:h:c:" opt; do
     case ${opt} in
         v )
-            PIO_VERSION=$OPTARG
+            HDF5_VERSION=$OPTARG
             ;;
         c )
             ENVIRONMENT=$OPTARG
@@ -69,8 +67,9 @@ while getopts ":v:h:c:" opt; do
     esac
 done
 
+
 yum install -y \
-    curl-devel \
+    environment-modules \
     gcc \
     gcc-c++ \
     gcc-gfortran \
@@ -95,69 +94,62 @@ do
 
     load_environment $comp_mpi "$DEPENDS_ON"
 
-    PACKAGE_PATH="/opt/${PACKAGE_NAME}/${PACKAGE_VERSION}/${compiler_name}/${compiler_version}"
+    HDF5_PATH="/opt/hdf5-parallel/${HDF5_VERSION}/${compiler_name}/${compiler_version}"
 
     # Check if already installed
-    if [ -d ${PACKAGE_PATH} ];
+    if [ -d ${HDF5_PATH} ];
     then
-        echo "${PACKAGE_NAME} already installed in ${PACKAGE_PATH}"
+        echo "HDF5 already installed in ${HDF5_PATH}"
         continue
     fi
 
     # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t ${PACKAGE_NAME}_XXXXXXXXXXXX`
+    WORKDIR=`mktemp -d -p /tmp -t hdf5_XXXXXXXXXXXX`
     cd ${WORKDIR}
 
-
-    # Retrieve archive
-    if [ ! -f ${PACKAGE_TAR} ]; then
-        echo "Download archive"
-        wget ${PACKAGE_URL}
-    fi
-
-    # Check if archive already exist untar
-    if [ ! -d ${PACKAGE_TAR} ]; then
-        echo "Extract archive"
-        tar xzf ${PACKAGE_TAR}
-    fi
-
-    cd ${PACKAGE_NAME}-${PACKAGE_VERSION}
+    # Retreive hdf5 from git repo
+    git clone -b hdf5-"${HDF5_VERSION//./_}" ${HDF5_URL}
+    cd hdf5
 
     ./configure \
         CC=mpicc \
         CXX=mpicxx \
         FC=mpif90 \
-        --prefix=${PACKAGE_PATH} \
-        --enable-fortran \
-        --enable-netcdf-integration
+        --prefix=${HDF5_PATH} \
+        --with-zlib=${ZLIB_PATH} \
+        --enable-parallel \
+        --enable-shared \
+        --enable-static \
+        --enable-hl
 
     make -j
     make install
 
-    mkdir -p ${MODULES_PATH}/${PACKAGE_NAME}
+    mkdir -p ${MODULES_PATH}/hdf5-parallel
 
     #Create module file
-    cat > ${MODULES_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}-${compiler_name}-${compiler_version} << EOF
+    cat > ${MODULES_PATH}/hdf5-parallel/${HDF5_VERSION}-${compiler_name}-${compiler_version} << EOF
 #%Module
 
 # NOTE: This is an automatically-generated file!
 proc ModulesHelp { } {
-   puts stderr "This module adds ${PACKAGE_NAME^^} v${PACKAGE_VERSION} to various paths"
+   puts stderr "This module adds HDF5 Parallel v${HDF5_VERSION} to various paths"
 }
 
-module-whatis "Sets up ${PACKAGE_NAME^^} v${PACKAGE_VERSION} in your environment"
+module-whatis "Sets up HDF5 Parallel v${HDF5_VERSION} in your environment"
 
-setenv PIO_HOME "${PACKAGE_PATH}"
+setenv HDF5_PARALLEL_HOME "${HDF5_PATH}"
 
-prepend-path PATH "${PACKAGE_PATH}/bin"
-prepend-path CPATH "${PACKAGE_PATH}/include"
-prepend-path LD_LIBRARY_PATH "${PACKAGE_PATH}/lib"
-prepend-path LIBRARY_PATH "${PACKAGE_PATH}/lib"
-prepend-path MANPATH "${PACKAGE_PATH}/share/man"
+prepend-path PATH "${HDF5_PATH}/bin"
+prepend-path CPATH "${HDF5_PATH}/include"
+prepend-path LD_LIBRARY_PATH "${HDF5_PATH}/lib"
+prepend-path LIBRARY_PATH "${HDF5_PATH}/lib"
+prepend-path MANPATH "${HDF5_PATH}/share/man"
 
 EOF
 
     #Clean up
     cd
     rm -rf ${WORKDIR}
+
 done

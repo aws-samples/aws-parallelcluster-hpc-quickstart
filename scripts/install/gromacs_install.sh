@@ -18,6 +18,12 @@
 
 set -e
 
+GROMACS_DEFAULT_VERSION="v2021.4"
+
+GROMACS_URL=https://gitlab.com/gromacs/gromacs.git
+MODULES_PATH="/usr/share/Modules/modulefiles"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+
 # Help Options
 show_help() {
     cat << EOF
@@ -30,11 +36,18 @@ or when FILE is -, read standard input.
 EOF
 }
 
+show_default() {
+    cat << EOF
+No GROMACS Version specified
+Using default: ${GROMACS_DEFAULT_VERSION}
+EOF
+GROMACS_VERSION=${GROMACS_DEFAULT_VERSION}
+}
+
 # Parse options
 OPTIND=1 # Reset if getopts used previously
 if (($# == 0)); then
-    show_help
-    exit 2
+    show_default
 fi
 
 while getopts ":v:h:" opt; do
@@ -47,14 +60,10 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            GROMACS_VERSION="v2021.4"
+            GROMACS_VERSION=${GROMACS_DEFAULT_VERSION}
             ;;
     esac
 done
-
-GROMACS_URL=https://gitlab.com/gromacs/gromacs.git
-MODULES_PATH="/usr/share/Modules/modulefiles"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 
 yum install -y \
@@ -73,68 +82,26 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
-# Add modules
-add_dependent_modules() {
-    if [[ ! -z ${MODULE_DEPENDENCIES} ]]; then
-        MODULE_DEPENDENCIES+=" "
-    fi
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-    MODULE_DEPENDENCIES+="$1"
-}
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
 
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    MODULE_DEPENDENCIES=""
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
+    load_environment $comp_mpi "$DEPENDS_ON"
+    GROMACS_PATH="/opt/gromacs/${GROMACS_VERSION}/${compiler_name}/${compiler_version}"
 
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-    add_dependent_modules "compiler/${COMPILER}"
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-        add_dependent_modules "mpi/${MPI}"
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-        add_dependent_modules "mpi/${MPI}-${compiler_name}-${compiler_version}"
+    if [ -d ${GROMACS_PATH} ]; then
+        echo "GROMACS already installed in ${GROMACS_PATH}"
+        continue
     fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
     # Create build directory in /tmp
     WORKDIR=`mktemp -d -p /tmp -t gromacs_XXXXXXXXXX`
     cd ${WORKDIR}
-
-    GROMACS_PATH="/opt/gromacs/${GROMACS_VERSION}/${compiler_name}/${compiler_version}"
-    mkdir -p ${GROMACS_PATH}/bin
-
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        if [[ "$i" == "mkl"* ]]; then
-            module load ${i}
-            add_dependent_modules "${i}"
-        else
-            module load ${i}-${compiler_name}-${compiler_version}
-            add_dependent_modules "${i}-${compiler_name}-${compiler_version}"
-        fi
-    done
-
 
     echo "Cloning Gromacs release branch"
 
@@ -160,6 +127,7 @@ do
 
     make -j
 
+    mkdir -p ${GROMACS_PATH}/bin
     cp ${WORKDIR}/gromacs_git/build/bin/gmx_mpi  ${GROMACS_PATH}/bin/gmx_mpi
 
 

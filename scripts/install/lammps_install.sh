@@ -18,6 +18,14 @@
 
 set -e
 
+LAMMPS_DEFAULT_VERSION="stable_29Oct2020"
+LAMMPS_URL=https://github.com/lammps/lammps.git
+
+MODULES_PATH="/usr/share/Modules/modulefiles"
+
+DEPENDS_ON="mkl/2022.1.0"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+
 # Help Options
 show_help() {
     cat << EOF
@@ -30,11 +38,18 @@ or when FILE is -, read standard input.
 EOF
 }
 
+show_default() {
+    LAMMPS_VERSION=${LAMMPS_DEFAULT_VERSION}
+    cat << EOF
+No LAMMPS Version specified
+Using default: ${LAMMPS_VERSION}
+EOF
+}
+
 # Parse options
 OPTIND=1 # Reset if getopts used previously
 if (($# == 0)); then
-    show_help
-    exit 2
+    show_default
 fi
 
 while getopts ":v:h:" opt; do
@@ -47,15 +62,11 @@ while getopts ":v:h:" opt; do
             exit 0
             ;;
         * )
-            LAMMPS_VERSION="stable_29Oct2020"
+            LAMMPS_VERSION=${LAMMPS_DEFAULT_VERSION}
             ;;
     esac
 done
 
-LAMMPS_URL=https://github.com/lammps/lammps.git
-MODULES_PATH="/usr/share/Modules/modulefiles"
-DEPENDS_ON="mkl/2022.1.0"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
 
 yum install -y \
     environment-modules \
@@ -71,68 +82,26 @@ yum install -y \
 #Load module
 source /etc/profile.d/modules.sh
 
-# Add modules
-add_dependent_modules() {
-    if [[ ! -z ${MODULE_DEPENDENCIES} ]]; then
-        MODULE_DEPENDENCIES+=" "
-    fi
+# Find parent path
+PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-    MODULE_DEPENDENCIES+="$1"
-}
+# Modules function
+source ${PARENT_PATH}/modules_functions.sh
 
 #Load compilers
 for comp_mpi in $ENVIRONMENT
 do
 
-    MODULE_DEPENDENCIES=""
-    COMPILER=$(echo $comp_mpi | cut -d';' -f1)
-    MPI=$(echo $comp_mpi | cut -d';' -f2)
+    load_environment $comp_mpi "$DEPENDS_ON"
+    LAMMPS_PATH="/opt/lammps/${LAMMPS_VERSION}/${compiler_name}/${compiler_version}"
 
-    compiler_name=$(echo $COMPILER | cut -d'/' -f1)
-    compiler_version=$(echo $COMPILER | cut -d'/' -f2)
-
-    mpi_name=$(echo $MPI | cut -d'/' -f1)
-    mpi_version=$(echo $MPI | cut -d'/' -f2)
-
-    module purge
-    module load compiler/${COMPILER}
-    add_dependent_modules "compiler/${COMPILER}"
-
-    if [[ "${mpi_name}" == "intel" ]]; then
-
-        module load mpi/${MPI}
-        add_dependent_modules "mpi/${MPI}"
-    else
-        module load mpi/${MPI}-${compiler_name}-${compiler_version}
-        add_dependent_modules "mpi/${MPI}-${compiler_name}-${compiler_version}"
+    if [ -d ${LAMMPS_PATH} ]; then
+        echo "LAMMPS already installed in ${LAMMPS_PATH}"
+        continue
     fi
-
-    if [[ "${compiler_name}" == "intel" ]]; then
-        export I_MPI_CC=icc
-        export I_MPI_CXX=icpc
-        export I_MPI_FC=ifort
-        export I_MPI_F90=ifort
-    fi
-
     # Create build directory in /tmp
     WORKDIR=`mktemp -d -p /tmp -t lammps_XXXXXXXXXX`
     cd ${WORKDIR}
-
-    LAMMPS_PATH="/opt/lammps/${LAMMPS_VERSION}/${compiler_name}/${compiler_version}"
-    mkdir -p ${LAMMPS_PATH}/bin
-
-    # Load depdencies
-    for i in $DEPENDS_ON
-    do
-        if [[ "$i" == "mkl"* ]]; then
-            module load ${i}
-            add_dependent_modules "${i}"
-        else
-            module load ${i}-${compiler_name}-${compiler_version}
-            add_dependent_modules "${i}-${compiler_name}-${compiler_version}"
-        fi
-    done
-
 
     echo "Cloning LAMMPS stable branch"
 
@@ -146,13 +115,16 @@ do
         sed -i "s%-xHost%-xCORE-AVX512%g" MAKE/OPTIONS/Makefile.intel_cpu_intelmpi
         echo "Compiling LAMMPS code"
         make -j 8 intel_cpu_intelmpi
-        cp ${WORKDIR}/lammps_git/src/lmp_intel_cpu_intelmpi ${LAMMPS_PATH}/bin/
+        LAMMPS_BINARY=${WORKDIR}/lammps_git/src/lmp_intel_cpu_intelmpi
     else
         echo "Compiling LAMMPS code"
         make -j 8 g++_openmpi
-        cp ${WORKDIR}/lammps_git/src/lmp_g++_openmpi ${LAMMPS_PATH}/bin/
+        LAMMPS_BINARY=${WORKDIR}/lammps_git/src/lmp_g++_openmpi
 
     fi
+
+    mkdir -p ${LAMMPS_PATH}/bin
+    cp ${LAMMPS_BINARY} ${LAMMPS_PATH}/bin/
 
     mkdir -p ${MODULES_PATH}/lammps
 

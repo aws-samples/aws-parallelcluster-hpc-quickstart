@@ -109,31 +109,9 @@
       "script": "../../../../scripts/install/modules_install.sh"
     },
     {
-      "type": "shell",
-      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
-      "script": "../../../../scripts/install/gcc_install.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
-      "script": "../../../../scripts/install/openmpi_install.sh"
-    },
-    {
       "type": "file",
-      "source": "../../../../scripts/install/intel_oneapi_compiler_mpi_install.sh",
-      "destination": "/tmp/intel_oneapi_compiler_mpi_install.sh"
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "sudo chmod u+x /tmp/intel_oneapi_compiler_mpi_install.sh",
-        "sudo /tmp/intel_oneapi_compiler_mpi_install.sh"
-      ]
-    },
-    {
-      "type": "file",
-      "source": "../../../../scripts/install/lammps_install.sh",
-      "destination": "/tmp/lammps_install.sh"
+      "source": "../../../../scripts/install/",
+      "destination": "/tmp/"
     },
     {
       "type": "shell",

@@ -19,28 +19,25 @@ set -e
 
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
-PACKAGE_NAME="pio"
+NETCDF_C_VERSION="4.7.4"
+DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2"
 
-PACKAGE_VERSION="2.5.4"
-DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
-
-PACKAGE_ARCHIVE="${PACKAGE_NAME}${PACKAGE_VERSION//./_}/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz"
-PACKAGE_TAR=$(echo $PACKAGE_ARCHIVE | cut -d'/' -f2)
-PACKAGE_URL="https://github.com/NCAR/ParallelIO/releases/download/${PACKAGE_ARCHIVE}"
+NETCDF_C_ARCHIVE="netcdf-c-${NETCDF_C_VERSION}.tar.gz"
+NETCDF_C_URL="https://codeload.github.com/Unidata/netcdf-c/tar.gz/refs/tags/v${NETCDF_C_VERSION}"
 
 show_help() {
     cat << EOF
 Usage: ${0##*/} [-hv]
 
-    -h                display this help and exit
-    -v PIO_VERSION    PIO Version
+    -h                  display this help and exit
+    -v NETCDF_C_VERSION    Intel oneAPI Version
 EOF
 }
 
 show_default() {
     cat << EOF
-No PIO Version specified
-Using default: ${PIO_VERSION}
+No NETCDF_C Version specified
+Using default: ${NETCDF_C_VERSION}
 EOF
 }
 
@@ -53,7 +50,7 @@ fi
 while getopts ":v:h:c:" opt; do
     case ${opt} in
         v )
-            PIO_VERSION=$OPTARG
+            NETCDF_C_VERSION=$OPTARG
             ;;
         c )
             ENVIRONMENT=$OPTARG
@@ -71,6 +68,7 @@ done
 
 yum install -y \
     curl-devel \
+    environment-modules \
     gcc \
     gcc-c++ \
     gcc-gfortran \
@@ -95,65 +93,73 @@ do
 
     load_environment $comp_mpi "$DEPENDS_ON"
 
-    PACKAGE_PATH="/opt/${PACKAGE_NAME}/${PACKAGE_VERSION}/${compiler_name}/${compiler_version}"
+    NETCDF_C_PATH="/opt/netcdf-c/${NETCDF_C_VERSION}/${compiler_name}/${compiler_version}"
 
     # Check if already installed
-    if [ -d ${PACKAGE_PATH} ];
+    if [ -d ${NETCDF_C_PATH} ];
     then
-        echo "${PACKAGE_NAME} already installed in ${PACKAGE_PATH}"
+        echo "NetCDF-C already installed in ${NETCDF_C_PATH}"
         continue
     fi
 
     # Create build directory in /tmp
-    WORKDIR=`mktemp -d -p /tmp -t ${PACKAGE_NAME}_XXXXXXXXXXXX`
+    WORKDIR=`mktemp -d -p /tmp -t netcdf_c_XXXXXXXXXXXX`
     cd ${WORKDIR}
 
-
     # Retrieve archive
-    if [ ! -f ${PACKAGE_TAR} ]; then
+    if [ ! -f ${NETCDF_C_ARCHIVE} ]; then
         echo "Download archive"
-        wget ${PACKAGE_URL}
+        curl -o ${NETCDF_C_ARCHIVE} ${NETCDF_C_URL}
     fi
 
     # Check if archive already exist untar
-    if [ ! -d ${PACKAGE_TAR} ]; then
+    if [ ! -d ${NETCDF_C_ARCHIVE::-7} ]; then
         echo "Extract archive"
-        tar xzf ${PACKAGE_TAR}
+        tar xzf ${NETCDF_C_ARCHIVE}
     fi
 
-    cd ${PACKAGE_NAME}-${PACKAGE_VERSION}
+    cd ${NETCDF_C_ARCHIVE::-7}
+
+    # Enable large file support
+    export WRFIO_NCD_LARGE_FILE_SUPPORT=1
 
     ./configure \
         CC=mpicc \
         CXX=mpicxx \
         FC=mpif90 \
-        --prefix=${PACKAGE_PATH} \
+        --prefix=${NETCDF_C_PATH} \
         --enable-fortran \
-        --enable-netcdf-integration
+        --enable-shared \
+        --with-pic \
+        --enable-parallel-tests \
+        --enable-pnetcdf \
+        --enable-large-file-tests \
+        --enable-largefile \
+        --enable-netcdf
 
     make -j
     make install
 
-    mkdir -p ${MODULES_PATH}/${PACKAGE_NAME}
+    mkdir -p ${MODULES_PATH}/netcdf-c
 
     #Create module file
-    cat > ${MODULES_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}-${compiler_name}-${compiler_version} << EOF
+    cat > ${MODULES_PATH}/netcdf-c/${NETCDF_C_VERSION}-${compiler_name}-${compiler_version} << EOF
 #%Module
 
 # NOTE: This is an automatically-generated file!
 proc ModulesHelp { } {
-   puts stderr "This module adds ${PACKAGE_NAME^^} v${PACKAGE_VERSION} to various paths"
+   puts stderr "This module adds NetCDF-C v${NETCDF_C_VERSION} to various paths"
 }
 
-module-whatis "Sets up ${PACKAGE_NAME^^} v${PACKAGE_VERSION} in your environment"
+module-whatis "Sets up NetCDF-C v${NETCDF_C_VERSION} in your environment"
 
-setenv PIO_HOME "${PACKAGE_PATH}"
+setenv NETCDF_C_HOME "${NETCDF_C_PATH}"
 
-prepend-path PATH "${PACKAGE_PATH}/bin"
-prepend-path CPATH "${PACKAGE_PATH}/include"
-prepend-path LD_LIBRARY_PATH "${PACKAGE_PATH}/lib"
-prepend-path LIBRARY_PATH "${PACKAGE_PATH}/lib"
-prepend-path MANPATH "${PACKAGE_PATH}/share/man"
+prepend-path PATH "${NETCDF_C_PATH}/bin"
+prepend-path CPATH "${NETCDF_C_PATH}/include"
+prepend-path LD_LIBRARY_PATH "${NETCDF_C_PATH}/lib"
+prepend-path LIBRARY_PATH "${NETCDF_C_PATH}/lib"
+prepend-path MANPATH "${NETCDF_C_PATH}/share/man"
 
 EOF
 
