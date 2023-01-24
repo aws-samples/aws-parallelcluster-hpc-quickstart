@@ -23,7 +23,7 @@ WRF_URL="https://github.com/wrf-model/WRF.git"
 MODULES_PATH="/usr/share/Modules/modulefiles"
 
 DEPENDS_ON="hdf5-parallel/1.10.6 pnetcdf/1.12.2 netcdf-c/4.7.4 netcdf-fortran/4.5.3"
-ENVIRONMENT="intel/2022.2.0;intel/2022.2.0 gcc/10.3.0;openmpi/4.1.4"
+ENVIRONMENT="intel/2022.2.0;intel/2022.2.0"
 
 # Help Options
 show_help() {
