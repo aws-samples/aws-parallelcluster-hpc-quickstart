@@ -86,7 +86,6 @@ The sample relies on packer to build an AWS Machine Image (AMI) containing an in
 It is compiled and optimized for Intel Xeon Scalable Processor using the following compiler and MPI combination:
 
 - Intel oneAPI compiler and Intel oneAPI MPI 2022.2.0
-- GNU 10.3.0 and Open MPI 4.1.4
 
 The packer scripts are located in the amis folder and are organized by Operating System (OS) such as `\[OS\]-pc-wrf`.
 The available OS for this solution are:
