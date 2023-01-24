@@ -226,5 +226,3 @@ sed -i "s%^module load debugger%#&%" ${INTEL_PATH}/compiler/${INTEL_COMPILER_VER
 
 mkdir -p ${MODULES_PATH}/mpi/intel
 ln -s ${INTEL_PATH}/mpi/${INTEL_MPI_VERSION}/modulefiles/mpi ${MODULES_PATH}/mpi/intel/${INTEL_VERSION}
-
-module use --append ${INTEL_PATH}/modulefiles

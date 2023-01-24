@@ -105,7 +105,10 @@ install_software() {
     PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
     if [ -z ${COMPILER} ]; then
-        . ${PARENT_PATH}/${name}_install.sh -v ${version}
+        bash ${PARENT_PATH}/${name}_install.sh -v ${version}
+        unset MODULEPATH
+        source /etc/profile.d/modules.sh
+        module refresh
     else
         bash ${PARENT_PATH}/${name}_install.sh -v ${version} -c ${COMPILER}
     fi
