@@ -4,7 +4,7 @@
   "application_name": "wrf",
   "application_version": "4.2.2",
   "intel_serial_number": "",
-  "instance_type": "m5zn.3xlarge",
+  "instance_type": "m5zn.12xlarge",
   "encrypt_boot": "false",
   "name": "amzn2-parallelcluster",
   "public_ip": "true",
