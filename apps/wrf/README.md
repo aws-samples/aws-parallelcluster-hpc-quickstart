@@ -1,7 +1,7 @@
 # WRF with ParallelIO
 
 WRF with ParallelIO provides steps and code samples to build and run WRF on AWS using [AWS ParallelCluster](<https://docs.aws.amazon.com/parallelcluster/>).
-It is targeted for Intel CPU Platform from Haswell and onward.
+It is targeted for Amazon EC2 HPC optimice instances based AMD CPU Milan.
 
 ## WRF On AWS
 
@@ -21,9 +21,11 @@ AWS Cloud9 contains a collection of tools that let you code, build, run, test, d
 
 The link below will create an AWS Cloud9 environment from which you will be able to create your cluster.
 
-[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg>)](<https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
 
 [![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-2.svg>)](<https://us-east-2.console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
+
+
+[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/eu-north-1.svg>)](<https://us-east-1.console.aws.amazon.com/cloudformation/home?region=eu-north-1#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
 
 1. Open the [AWS Cloud9 console](<https://console.aws.amazon.com/cloud9>).
 1. Select **MyCloud9Env**.
@@ -120,7 +122,7 @@ packer build \
 ### Deploy AWS ParallelCluster with WRF
 
 Create the AWS ParallelCluster Configuration file.
-Instances that will be used are c5n.18xlarge
+Instances that will be used are hpc6a.48xlarge
 
 ```bash
 # Going back from where you started
@@ -192,15 +194,15 @@ cp /opt/wrf-omp/src/run/{\
 Create a slurm submission script
 
 ```bash
-cat > slurm-c5n-wrf-conus12km.sh << EOF
+cat > slurm-hpca-wrf-conus12km.sh << EOF
 #!/bin/bash
 
 #SBATCH --job-name=WRF-CONUS12km
-#SBATCH --partition=c5n18large
+#SBATCH --partition=hpc6a48large
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --ntasks=72
-#SBATCH --ntasks-per-node=36
+#SBATCH --ntasks=192
+#SBATCH --ntasks-per-node=96
 #SBATCH --cpus-per-task=1
 
 
@@ -214,10 +216,10 @@ mpirun wrf.exe
 EOF
 ```
 
-Run the CONUS 12Km test case on 2 x c5n.18xlarge instances
+Run the CONUS 12Km test case on 2 x hpc6a.48xlarge instances
 
 ```bash
-sbatch slurm-c5n-wrf-conus12km.sh
+sbatch slurm-hpca-wrf-conus12km.sh
 ```
 
 The job should complete in a couple of minutes with the output and error files located in the `/fsx` directory.

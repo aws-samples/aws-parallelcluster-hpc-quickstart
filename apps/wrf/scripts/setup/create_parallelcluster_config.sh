@@ -29,7 +29,7 @@ else
 fi
 
 # Define Instances seperated by ','
-export INSTANCES="c5n.18xlarge"
+export INSTANCES="hpc6a.48xlarge"
 
 
 # Create SSH Key
