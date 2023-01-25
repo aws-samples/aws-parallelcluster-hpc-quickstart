@@ -16,7 +16,7 @@ SharedStorage:
       StorageCapacity: 1200
       DeploymentType: SCRATCH_2
 HeadNode:
-  InstanceType: c5.xlarge
+  InstanceType: c6a.xlarge
   Networking:
     SubnetId: '{SUBNET_ID}'
   Ssh:
@@ -24,26 +24,18 @@ HeadNode:
   LocalStorage:
     RootVolume:
       Size: 40
-  Iam:
-    AdditionalIamPolicies:
-      - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-      - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
 Scheduling:
   Scheduler: slurm
   SlurmQueues:
-    - Name: c5n18large
+    - Name: hpc6a48xlarge
       ComputeResources:
-        - Name: c5n18large
-          InstanceType: c5n.18xlarge
+        - Name: hpc6a48xlarge
+          InstanceType: hpc6a.48xlarge
           MinCount: 0
           MaxCount: 64
           DisableSimultaneousMultithreading: true
           Efa:
             Enabled: true
-      Iam:
-        AdditionalIamPolicies:
-          - Policy: arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-          - Policy: arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
       Networking:
         SubnetIds:
           - '{SUBNET_ID}'

@@ -133,6 +133,9 @@ do
 
     ./configure <<< $WRF_CONFIG
 
+    if [[ "${compiler_name}" == "intel" ]]; then
+        sed -i "s/#-xHost/-march=core-avx2/g" configure.wrf
+    fi
 
     ./compile -j `nproc` em_real
 
