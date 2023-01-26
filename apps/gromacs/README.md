@@ -79,7 +79,7 @@ source .env/bin/activate
 Install AWS ParallelCluster
 
 ```bash
-pip3 install aws-parallelcluster==3.2.0
+pip3 install aws-parallelcluster==3.4.1
 
 # Set AWS Region
 export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
