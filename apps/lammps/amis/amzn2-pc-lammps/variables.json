@@ -1,6 +1,6 @@
 {
   "aws_region": "us-east-1",
-  "parallel_cluster_version": "3.2.0",
+  "parallel_cluster_version": "3.4.1",
   "application_name": "lammps",
   "application_version": "stable_29Oct2020",
   "intel_serial_number": "",
