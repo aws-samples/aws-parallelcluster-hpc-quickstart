@@ -1,0 +1,421 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#aws cloudformation deploy --stack-name cloud9 --template-file cf_hpc_solutions_cloud9.yaml --region us-east-2 --capabilities CAPABILITY_NAMED_IAM
+#aws cloudformation update-stack --stack-name cloud9 --template-body file://cf_hpc_solutions_cloud9.yaml --region us-east-2 --capabilities CAPABILITY_NAMED_IAM
+
+Parameters:
+  LabName:
+    Type: String
+    AllowedPattern : ".+"
+    Default: "MyCloud9Env"
+
+Resources:
+  Cloud9Lab:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties: 
+      AutomaticStopTimeMinutes: 1440
+      ConnectionType: CONNECT_SSM
+      ImageId: amazonlinux-2-x86_64
+      InstanceType: "t3.micro"
+      Name: !Ref LabName
+      #OwnerArn: !Sub 'arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey'
+
+  Cloud9Policy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: 'Cloud9Policy-labs'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'ec2:Describe*'
+            Resource: '*'
+            Effect: Allow
+            Sid: EC2Read
+          - Action:
+              - 'ec2:AllocateAddress'
+              - 'ec2:AssociateAddress'
+              - 'ec2:AttachNetworkInterface'
+              - 'ec2:AuthorizeSecurityGroupEgress'
+              - 'ec2:AuthorizeSecurityGroupIngress'
+              - 'ec2:CreateLaunchTemplate'
+              - 'ec2:CreateLaunchTemplateVersion'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:CreatePlacementGroup'
+              - 'ec2:CreateSecurityGroup'
+              - 'ec2:CreateSnapshot'
+              - 'ec2:CreateTags'
+              - 'ec2:CreateVolume'
+              - 'ec2:DeleteLaunchTemplate'
+              - 'ec2:DeleteNetworkInterface'
+              - 'ec2:DeletePlacementGroup'
+              - 'ec2:DeleteSecurityGroup'
+              - 'ec2:DeleteVolume'
+              - 'ec2:DisassociateAddress'
+              - 'ec2:ModifyLaunchTemplate'
+              - 'ec2:ModifyNetworkInterfaceAttribute'
+              - 'ec2:ModifyVolume'
+              - 'ec2:ModifyVolumeAttribute'
+              - 'ec2:ReleaseAddress'
+              - 'ec2:RevokeSecurityGroupEgress'
+              - 'ec2:RevokeSecurityGroupIngress'
+              - 'ec2:RunInstances'
+              - 'ec2:TerminateInstances'
+            Resource: '*'
+            Effect: Allow
+            Sid: EC2Write
+          - Action:
+              - 'dynamodb:DescribeTable'
+              - 'dynamodb:ListTagsOfResource'
+              - 'dynamodb:CreateTable'
+              - 'dynamodb:DeleteTable'
+              - 'dynamodb:GetItem'
+              - 'dynamodb:PutItem'
+              - 'dynamodb:Query'
+              - 'dynamodb:TagResource'
+            Resource: !Sub 'arn:aws:dynamodb:*:${AWS::AccountId}:table/parallelcluster-*'
+            Effect: Allow
+            Sid: DynamoDB
+          - Action:
+              - 'route53:ChangeResourceRecordSets'
+              - 'route53:ChangeTagsForResource'
+              - 'route53:CreateHostedZone'
+              - 'route53:DeleteHostedZone'
+              - 'route53:GetChange'
+              - 'route53:GetHostedZone'
+              - 'route53:ListResourceRecordSets'
+              - 'route53:ListQueryLoggingConfigs'
+            Resource: '*'
+            Effect: Allow
+            Sid: Route53HostedZones
+          - Action:
+              - 'cloudformation:*'
+            Resource: '*'
+            Effect: Allow
+            Sid: CloudFormation
+          - Action:
+              - 'cloudwatch:PutDashboard'
+              - 'cloudwatch:ListDashboards'
+              - 'cloudwatch:DeleteDashboards'
+              - 'cloudwatch:GetDashboard'
+            Resource: '*'
+            Effect: Allow
+            Sid: CloudWatch
+          - Action:
+              - 'iam:GetRole'
+              - 'iam:GetRolePolicy'
+              - 'iam:GetPolicy'
+              - 'iam:SimulatePrincipalPolicy'
+              - 'iam:GetInstanceProfile'
+            Resource:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/*'
+              - 'arn:aws:iam::aws:policy/*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:instance-profile/*'
+            Effect: Allow
+            Sid: IamRead
+          - Action:
+              - 'iam:CreateInstanceProfile'
+              - 'iam:DeleteInstanceProfile'
+              - 'iam:AddRoleToInstanceProfile'
+              - 'iam:RemoveRoleFromInstanceProfile'
+            Resource:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:instance-profile/parallelcluster/*'
+            Effect: Allow
+            Sid: IamInstanceProfile
+          - Condition:
+              StringEqualsIfExists:
+                'iam:PassedToService':
+                  - lambda.amazonaws.com
+                  - ec2.amazonaws.com
+                  - spotfleet.amazonaws.com
+            Action:
+              - 'iam:PassRole'
+            Resource:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/parallelcluster/*'
+            Effect: Allow
+            Sid: IamPassRole
+          - Condition:
+              StringEquals:
+                'iam:AWSServiceName':
+                  - fsx.amazonaws.com
+                  - s3.data-source.lustre.fsx.amazonaws.com
+            Action:
+              - 'iam:CreateServiceLinkedRole'
+              - 'iam:DeleteServiceLinkedRole'
+            Resource: '*'
+            Effect: Allow
+          - Action:
+              - 'lambda:CreateFunction'
+              - 'lambda:DeleteFunction'
+              - 'lambda:GetFunctionConfiguration'
+              - 'lambda:GetFunction'
+              - 'lambda:InvokeFunction'
+              - 'lambda:AddPermission'
+              - 'lambda:RemovePermission'
+              - 'lambda:UpdateFunctionConfiguration'
+              - 'lambda:TagResource'
+              - 'lambda:ListTags'
+              - 'lambda:UntagResource'
+            Resource:
+              - !Sub 'arn:aws:lambda:*:${AWS::AccountId}:function:parallelcluster-*'
+              - !Sub 'arn:aws:lambda:*:${AWS::AccountId}:function:pcluster-*'
+            Effect: Allow
+            Sid: Lambda
+          - Action:
+              - 's3:*'
+            Resource:
+              - 'arn:aws:s3:::parallelcluster-*'
+              - 'arn:aws:s3:::aws-parallelcluster-*'
+            Effect: Allow
+            Sid: S3ResourcesBucket
+          - Action:
+              - 's3:Get*'
+              - 's3:List*'
+            Resource: 'arn:aws:s3:::*-aws-parallelcluster*'
+            Effect: Allow
+            Sid: S3ParallelClusterReadOnly
+          - Action:
+              - 'fsx:*'
+            Resource:
+              - !Sub 'arn:aws:fsx:*:${AWS::AccountId}:*'
+            Effect: Allow
+            Sid: FSx
+          - Action:
+              - 'elasticfilesystem:*'
+            Resource:
+              - !Sub 'arn:aws:elasticfilesystem:*:${AWS::AccountId}:*'
+            Effect: Allow
+            Sid: EFS
+          - Action:
+              - 'logs:DeleteLogGroup'
+              - 'logs:PutRetentionPolicy'
+              - 'logs:DescribeLogGroups'
+              - 'logs:CreateLogGroup'
+              - 'logs:FilterLogEvents'
+              - 'logs:GetLogEvents'
+              - 'logs:CreateExportTask'
+              - 'logs:DescribeLogStreams'
+              - 'logs:DescribeExportTasks'
+            Resource: '*'
+            Effect: Allow
+            Sid: CloudWatchLogs
+          - Action:
+              - 'iam:AttachRolePolicy'
+              - 'iam:DetachRolePolicy'
+            Resource: '*'
+            Effect: Allow
+            Sid: IamPolicy
+      Roles:
+        - !Ref Cloud9Role
+
+  PackerPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties: 
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'ec2:AttachVolume'
+              - 'ec2:AuthorizeSecurityGroupIngress'
+              - 'ec2:CopyImage'
+              - 'ec2:CreateImage'
+              - 'ec2:CreateKeypair'
+              - 'ec2:CreateSecurityGroup'
+              - 'ec2:CreateSnapshot'
+              - 'ec2:CreateTags'
+              - 'ec2:CreateVolume'
+              - 'ec2:DeleteKeyPair'
+              - 'ec2:DeleteSecurityGroup'
+              - 'ec2:DeleteSnapshot'
+              - 'ec2:DeleteVolume'
+              - 'ec2:DeregisterImage'
+              - 'ec2:DescribeImageAttribute'
+              - 'ec2:DescribeImages'
+              - 'ec2:DescribeInstances'
+              - 'ec2:DescribeInstanceStatus'
+              - 'ec2:DescribeRegions'
+              - 'ec2:DescribeSecurityGroups'
+              - 'ec2:DescribeSnapshots'
+              - 'ec2:DescribeSubnets'
+              - 'ec2:DescribeTags'
+              - 'ec2:DescribeVolumes'
+              - 'ec2:DetachVolume'
+              - 'ec2:GetPasswordData'
+              - 'ec2:ModifyImageAttribute'
+              - 'ec2:ModifyInstanceAttribute'
+              - 'ec2:ModifySnapshotAttribute'
+              - 'ec2:RegisterImage'
+              - 'ec2:RunInstances'
+              - 'ec2:StopInstances'
+              - 'ec2:TerminateInstances'
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - 'iam:PassRole'
+              - 'iam:CreateInstanceProfile'
+              - 'iam:DeleteInstanceProfile'
+              - 'iam:GetRole'
+              - 'iam:GetInstanceProfile'
+              - 'iam:DeleteRolePolicy'
+              - 'iam:DetachRolePolicy'
+              - 'iam:RemoveRoleFromInstanceProfile'
+              - 'iam:CreateRole'
+              - 'iam:DeleteRole'
+              - 'iam:PutRolePolicy'
+              - 'iam:AddRoleToInstanceProfile'
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - 'ssm:StartSession'
+              - 'ssm:TerminateSession'
+            Resource:
+              - '*'           
+      PolicyName: 'packer-policy'
+      Roles: 
+        - !Ref Cloud9Role
+
+  Cloud9Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+            - ssm.amazonaws.com
+            - cloud9.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AWSCloud9SSMInstanceProfile
+      Path: "/service-role/"
+
+  Cloud9InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref Cloud9Role
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/IAMFullAccess
+      MaxSessionDuration: 3600
+      Path: /
+
+
+  LambdaCloud9:
+    DependsOn: Cloud9Lab
+    Type: AWS::Lambda::Function
+    Properties: 
+      Architectures: 
+        - 'x86_64'
+      Code: 
+        ZipFile: |
+          #!/usr/bin/env python3
+
+          import boto3
+          import cfnresponse
+
+
+          def lambda_handler(event, context):
+              responseValue = event['ResourceProperties']['ProfileArn']
+              responseData = {}
+              responseData['Data'] = responseValue
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, "CustomResourcePhysicalID")
+              main(responseValue)
+              return {'statusCode': 200, 'body': json.dumps('Cloud9')}
+
+
+          def main(instance_profile_arn):
+              client = boto3.Session().client('ec2')
+              response = client.describe_instances(Filters=[
+                  {
+                      'Name': 'tag:Name',
+                      'Values': [
+                          'aws-cloud9-MyCloud9Env-*',
+                      ]
+                  },
+                  { 
+                    'Name': 'instance-state-name',
+                    'Values': ["pending", "running"]
+                  }
+              ])
+
+              ec2 = boto3.resource('ec2')
+
+              instance_id = response['Reservations'][0]['Instances'][0]['InstanceId']
+              IamInstanceProfile = {'Name': instance_profile_arn}
+              instance = ec2.Instance(instance_id)
+              instance.wait_until_running()
+              response = client.describe_iam_instance_profile_associations(Filters=[
+                  {
+                      'Name': 'instance-id',
+                      'Values': [
+                          instance_id,
+                      ]
+                  },
+              ])
+              if len(response['IamInstanceProfileAssociations']) > 0:
+                  instance_profile_association_id = response[
+                      'IamInstanceProfileAssociations'][0]['AssociationId']
+                  response = client.replace_iam_instance_profile_association(
+                      IamInstanceProfile=IamInstanceProfile,
+                      AssociationId=instance_profile_association_id)
+              else:
+                  response = client.associate_iam_instance_profile(
+                      IamInstanceProfile=IamInstanceProfile, InstanceId=instance_id)
+
+      Handler: index.lambda_handler
+      MemorySize: 128
+      PackageType: 'Zip'
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: 'python3.9'
+      Timeout: 300
+
+  Primerinvoke:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: LambdaCloud9
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt LambdaCloud9.Arn
+      ProfileArn: !Ref Cloud9InstanceProfile
+
+Outputs:
+  Cloud9Environment:
+    Description: Cloud9 Env Url
+    Value: !Join [ '', ['https://', !Ref 'AWS::Region', '.console.aws.amazon.com/cloud9/ide/', !Ref Cloud9Lab]]
+
