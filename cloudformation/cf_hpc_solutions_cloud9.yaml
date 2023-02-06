@@ -38,7 +38,7 @@ Resources:
   Cloud9Policy:
     Type: 'AWS::IAM::Policy'
     Properties:
-      PolicyName: 'Cloud9Policy-labs'
+      PolicyName: 'Cloud9Policy-parallelcluster'
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -212,6 +212,7 @@ Resources:
               - 'logs:CreateExportTask'
               - 'logs:DescribeLogStreams'
               - 'logs:DescribeExportTasks'
+              - 'logs:TagResource'
             Resource: '*'
             Effect: Allow
             Sid: CloudWatchLogs
@@ -306,6 +307,7 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AWSCloud9SSMAccessRole
       - arn:aws:iam::aws:policy/AWSCloud9SSMInstanceProfile
       Path: "/service-role/"
 
