@@ -17,6 +17,7 @@
 
 #aws cloudformation deploy --stack-name cloud9 --template-file cf_hpc_solutions_cloud9.yaml --region us-east-2 --capabilities CAPABILITY_NAMED_IAM
 #aws cloudformation update-stack --stack-name cloud9 --template-body file://cf_hpc_solutions_cloud9.yaml --region us-east-2 --capabilities CAPABILITY_NAMED_IAM
+#Author: maxhaws
 
 Parameters:
   LabName:
@@ -292,6 +293,36 @@ Resources:
       Roles: 
         - !Ref Cloud9Role
 
+### AWS Cloud9 for accounts using Cloud9 for the first time.
+### Recommendation -> https://github.com/awsdocs/aws-cloud9-user-guide/blob/main/doc_source/ec2-ssm.md#using-aws-cloudformation-to-create-no-ingress-ec2-environments
+  AWSCloud9SSMAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - cloud9.amazonaws.com
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: 'Service linked role for AWS Cloud9'
+      Path: '/service-role/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCloud9SSMInstanceProfile
+      RoleName: 'AWSCloud9SSMAccessRole'
+
+  AWSCloud9SSMInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: AWSCloud9SSMInstanceProfile
+      Path: "/cloud9/"
+      Roles:
+        -  !Ref AWSCloud9SSMAccessRole
+####################
+
   Cloud9Role:
     Type: AWS::IAM::Role
     Properties:
@@ -307,9 +338,8 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/AWSCloud9SSMAccessRole
       - arn:aws:iam::aws:policy/AWSCloud9SSMInstanceProfile
-      Path: "/service-role/"
+      Path: /
 
   Cloud9InstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
