@@ -157,7 +157,7 @@ In this section, you will learn how to run simpleFoam from OpenFoam on a Motorob
 
 Create a work directory on FSx for Lustre, `/fsx`
 ```bash
-MOTORBIKE_DIR="/fsx/motorBikeDemo"
+export MOTORBIKE_DIR="/fsx/motorBikeDemo"
 mkdir -p ${MOTORBIKE_DIR}
 ```
 
@@ -178,7 +178,7 @@ cat > ~/change_motorbike.sh << EOF
 
 sed  's%numberOfSubdomains.*$%numberOfSubdomains 192;%g;s%(.*$%(8 6 4);%g' \${MOTORBIKE_DIR}/system/decomposeParDict.6 > \${MOTORBIKE_DIR}/system/decomposeParDict.hierarchical
 
-cat > \${MOTORBIKE_DIR}/system/decomposeParDict.ptscotch  << EOF
+cat > \${MOTORBIKE_DIR}/system/decomposeParDict.ptscotch  << EOF2
 FoamFile
 {
     version     2.0;
@@ -191,7 +191,7 @@ FoamFile
 numberOfSubdomains 192;
 
 method          ptscotch;
-EOF
+EOF2
 
 
 #Change the maximum number of cells per core and total for the domain to obtain a 4 million cells domain.
@@ -207,6 +207,7 @@ sed  -i 's%writeInterval.*$%writeInterval 50;%g;s%endTime .*$%endTime 50;%g' \${
 
 #Change the number of cells per axis.
 sed  -i 's%hex (.*$%hex (0 1 2 3 4 5 6 7) (30 12 12) simpleGrading (1 1 1)%g' \${MOTORBIKE_DIR}/system/blockMeshDict
+EOF
 ```
 
 Execute the script to create a 4 Million cells motorbike case.
