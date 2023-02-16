@@ -133,6 +133,11 @@ Download Sample case
 wget -P /fsx https://cpfd-software.com/wp-content/uploads/2023/02/barracuda_sample_case.zip
 ```
 
+Extract the sample case archive
+```bash
+unzip /fsx/barracuda_sample_case.zip -d /fsx
+```
+
 Submission
 ```bash
 cat > sbatch-barracuda-gasifier.sh << EOF
