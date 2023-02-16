@@ -1,0 +1,45 @@
+Region: '{AWS_REGION}'
+Image:
+  Os: alinux2
+SharedStorage:
+  - Name: myebs
+    StorageType: Ebs
+    MountDir: /shared
+    EbsSettings:
+      VolumeType: gp3
+      Size: 20
+  - Name: myfsx
+    StorageType: FsxLustre
+    MountDir: /fsx
+    FsxLustreSettings:
+      StorageCapacity: 7200
+      DeploymentType: SCRATCH_2
+HeadNode:
+  InstanceType: g4dn.xlarge
+  Networking:
+    SubnetId: '{SUBNET_ID}'
+  Ssh:
+    KeyName: '{SSH_KEY_NAME}'
+  Dcv:
+    Enabled: true
+  LocalStorage:
+    RootVolume:
+      Size: 40
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+    - Name: gpu-od-queue
+      ComputeResources:
+        - Name: p4d
+          Instances:
+            - InstanceType: p4de.24xlarge
+          MinCount: 0
+          MaxCount: 4
+          DisableSimultaneousMultithreading: true
+      Networking:
+        SubnetIds:
+          - '{SUBNET_ID}'
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 40
