@@ -21,7 +21,7 @@ AWS Cloud9 contains a collection of tools that let you code, build, run, test, d
 
 The link below will create an AWS Cloud9 environment from which you will be able to create your cluster.
 
-[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-2.svg>)](<https://us-east-2.console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
+[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg>)](<https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
 
 1. Open the [AWS Cloud9 console](<https://console.aws.amazon.com/cloud9>).
 1. Select **MyCloud9Env**.
