@@ -123,13 +123,11 @@ do
         -DGMX_DOUBLE=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DGMXAPI=OFF \
+        -DCMAKE_INSTALL_PREFIX=${GROMACS_PATH} \
         -DGMX_SIMD=AVX_512
 
     make -j
-
-    mkdir -p ${GROMACS_PATH}/bin
-    cp ${WORKDIR}/gromacs_git/build/bin/gmx_mpi  ${GROMACS_PATH}/bin/gmx_mpi
-
+    make install
 
     #Create module file
     mkdir -p ${MODULES_PATH}/gromacs
@@ -157,6 +155,20 @@ EOF
 
     cat >> ${MODULES_PATH}/gromacs/${GROMACS_VERSION}-${compiler_name}-${compiler_version} << EOF
 prepend-path PATH "${GROMACS_PATH}/bin"
+prepend-path CPATH "${GROMACS_PATH}/include"
+prepend-path LD_LIBRARY_PATH "${GROMACS_PATH}/lib64"
+prepend-path LIBRARY_PATH "${GROMACS_PATH}/lib64"
+prepend-path GMXDATA "${GROMACS_PATH}/share/gromacs"
+prepend-path MANPATH "${GROMACS_PATH}/share/man"
+
+setenv GMXPREFIX "/opt/gromacs/v2021.4/intel/2021.3.0"
+setenv GMXBIN "${GROMACS_PATH}/bin"
+setenv GMXLDLIB "${GROMACS_PATH}/lib64"
+setenv GMXMAN "${GROMACS_PATH}/share/man"
+setenv GMXDATA "${GROMACS_PATH}/share/gromacs"
+setenv GMXTOOLCHAINDIR "${GROMACS_PATH}/share/cmake"
+setenv GROMACS_DIR "${GROMACS_PATH}"
+
 
 EOF
     #Clean up
