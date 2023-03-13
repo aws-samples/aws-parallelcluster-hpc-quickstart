@@ -7,7 +7,7 @@ It is targeted Nvidia GPU instances.
 
 ### Architecture
 
-![Barracuda ParallelCluster Architecture](<docs/images/openfoam_architecture.png>)
+![Barracuda ParallelCluster Architecture](<docs/images/barracuda_architecture.png>)
 
 ## Deploying Barracuda on AWS
 
@@ -102,17 +102,17 @@ pcluster ssh -n ${CLUSTER_NAME} -i ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 
 Download Barracuda
 ```bash
-wget -P /shared https://cpfd-software.com/wp-content/uploads/2023/01/barracuda_virtual_reactor-22.1.1-Linux.tar.gz
+wget -P /shared https://cpfd-software.com/wp-content/uploads/2022/11/barracuda_virtual_reactor-22.1.0-Linux.tar.gz
 ```
 
 Extract archive
 ```bash
-tar -xvzf /shared/barracuda_virtual_reactor-22.1.1-Linux.tar.gz -C /shared
+tar -xvzf /shared/barracuda_virtual_reactor-22.1.0-Linux.tar.gz -C /shared
 ```
 
 Install Barracuda
 ```bash
-/shared/barracuda_virtual_reactor-22.1.1-Linux/barracuda_virtual_reactor-22.1.1-Linux.run install --default-answer --accept-licenses --confirm-command --root /shared/Barracuda/22.1.0
+/shared/barracuda_virtual_reactor-22.1.0-Linux/barracuda_virtual_reactor-22.1.0-Linux.run install --default-answer --accept-licenses --confirm-command --root /shared/Barracuda/22.1.0
 ```
 
 ## Run Barracuda
@@ -153,7 +153,7 @@ cat > sbatch-barracuda-gasifier.sh << EOF
 
 
 export cpfd_LICENSE="/shared/AWS-ls58.rlmcloud.com.lic"
-/shared/Barracuda/22.1.0/bin/cpfd.x -ow -cc -ct -cbc -cic -qmdp -qll -qfe -gpu -dmulti 1 -fallback quit gasifier.prj
+/shared/Barracuda/22.1.0/bin/cpfd.x -ow -cc -ct -cbc -cic -qmdp -qll -qfe -gpu -d0 -fallback quit gasifier.prj
 EOF
 ```
 
