@@ -111,8 +111,24 @@ do
     mkdir -p build
     cd build
 
-
     echo "Compiling GROMACS code"
+    cmake3 .. \
+        -DGMX_BUILD_OWN_FFTW=ON \
+        -DREGRESSIONTEST_DOWNLOAD=OFF \
+        -DCMAKE_C_COMPILER=mpicc \
+        -DCMAKE_CXX_COMPILER=mpicxx \
+        -DGMX_MPI=OFF \
+        -DGMX_OPENMP=on \
+        -DGMX_DOUBLE=OFF \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DGMXAPI=OFF \
+        -DCMAKE_INSTALL_PREFIX=${GROMACS_PATH} \
+        -DGMX_SIMD=AVX_512
+
+    make -j
+    make install
+
+    echo "Compiling GROMACS MPI code"
     cmake3 .. \
         -DGMX_BUILD_OWN_FFTW=ON \
         -DREGRESSIONTEST_DOWNLOAD=OFF \
