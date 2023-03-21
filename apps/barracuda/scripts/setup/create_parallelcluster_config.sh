@@ -40,14 +40,38 @@ export SSH_KEY_NAME="barracuda-ssh-key"
 SSH_KEY_EXIST=`aws ec2 describe-key-pairs --query KeyPairs[*] --filters Name=key-name,Values=${SSH_KEY_NAME} --region ${AWS_REGION} | jq "select(length > 0)"`
 
 if [[ -z ${SSH_KEY_EXIST} ]]; then
-    aws ec2 create-key-pair --key-name ${SSH_KEY_NAME} \
-        --query KeyMaterial \
+    KEY_INFO=`aws ec2 create-key-pair --key-name ${SSH_KEY_NAME} \
+        --key-type ed25519 \
         --region ${AWS_REGION} \
-        --output text > ~/.ssh/${SSH_KEY_NAME}
+        --output json`
 
+    KEY_PAIR=`echo $KEY_INFO | jq -r .KeyMaterial`
+    echo ${KEY_PAIR} > ~/.ssh/${SSH_KEY_NAME}
     chmod 400 ~/.ssh/${SSH_KEY_NAME}
+
+    KEY_PAIR_ID=`echo $KEY_INFO | jq -r .KeyPairId`
+    aws ssm put-parameter --name /ec2/keypair/${KEY_PAIR_ID} \
+        --value "${KEY_PAIR}" \
+        --type SecureString \
+        --tier Standard \
+        --data-type text \
+        --region ${AWS_REGION}
 else
     echo "[WARNING] SSH_KEY_NAME ${SSH_KEY_NAME} already exist"
+    echo "[WARNING] Retrieing ${SSH_KEY_NAME} from Parameter Store"
+    KEY_PAIR_ID=`aws ec2 describe-key-pairs --query KeyPairs[0].KeyPairId \
+    --filters Name=key-name,Values=${SSH_KEY_NAME} \
+    --output text \
+    --region ${AWS_REGION}`
+
+    KEY_PAIR=`aws ssm get-parameter --name /ec2/keypair/${KEY_PAIR_ID} \
+        --query Parameter.Value \
+        --output text \
+        --region ${AWS_REGION}`
+
+    chmod 700 ~/.ssh/${SSH_KEY_NAME}
+    echo ${KEY_PAIR} > ~/.ssh/${SSH_KEY_NAME}
+    chmod 400 ~/.ssh/${SSH_KEY_NAME}
 fi
 
 echo "[INFO] SSH_KEY_NAME = ${SSH_KEY_NAME}"
@@ -70,31 +94,10 @@ else
 fi
 
 
-# Find in which avaibility zone instances are available
-AZ_W_INSTANCES=`aws ec2 describe-instance-type-offerings --location-type "availability-zone" \
-    --filters Name=instance-type,Values=${INSTANCES} \
-    --query InstanceTypeOfferings[].Location \
-    --region ${AWS_REGION} | jq -r ".[]" | sort`
-
-INSTANCE_TYPE_COUNT=`echo ${INSTANCES} | awk -F "," '{print NF-1}'`
-
-if [ ${INSTANCE_TYPE_COUNT} -gt 0 ]; then
-    AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' '\n' | uniq -d`
-fi
-AZ_W_INSTANCES=`echo ${AZ_W_INSTANCES} | tr ' ' ',' | sed 's%,$%%g'`
-
-
-if [[ -z $AZ_W_INSTANCES ]]; then
-    echo "[ERROR] failed to retrieve availability zone"
-    return 1
-fi
-
-AZ_COUNT=`echo $AZ_W_INSTANCES | tr -s ',' ' ' | wc -w`
 export SUBNET_ID=`aws ec2 describe-subnets --query "Subnets[*].SubnetId" \
     --filters Name=vpc-id,Values=${VPC_ID} \
-    Name=availability-zone,Values=${AZ_W_INSTANCES} \
     --region ${AWS_REGION} \
-    | jq -r .[$(python3 -S -c "import random; print(random.randrange(${AZ_COUNT}))")]`
+    | jq -r .[]`
 
 if [[ ! -z $SUBNET_ID ]]; then
     echo "[INFO] SUBNET_ID = ${SUBNET_ID}"
@@ -111,6 +114,13 @@ PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/barracuda-cluster.yaml"
 yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
-yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[0] = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+
+it=0
+for i in $SUBNET_ID
+do
+    export TMP_SUB=${i}
+    yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[${it}] = strenv(TMP_SUB)' ${PARALLELCLUSTER_CONFIG}
+   it=$(( $it + 1 ))
+done
 
 echo "[DONE] Created AWS ParallelCluster configuration file for Barracuda Cluster"
