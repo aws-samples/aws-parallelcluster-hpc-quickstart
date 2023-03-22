@@ -26,6 +26,7 @@ if [ -z ${AWS_REGION} ]; then
     return 1
 else
     echo "[INFO] AWS_REGION = ${AWS_REGION}"
+    echo "export AWS_REGION=${AWS_REGION}" >> ~/.bashrc
 fi
 
 # Define Instances seperated by ','
@@ -34,6 +35,7 @@ export INSTANCES="p4de.24xlarge"
 
 # Create SSH Key
 export SSH_KEY_NAME="barracuda-ssh-key"
+echo "export SSH_KEY_NAME=${SSH_KEY_NAME}" >> ~/.bashrc
 
 [ ! -d ~/.ssh ] && mkdir -p ~/.ssh && chmod 700 ~/.ssh
 
@@ -58,19 +60,19 @@ if [[ -z ${SSH_KEY_EXIST} ]]; then
         --region ${AWS_REGION}
 else
     echo "[WARNING] SSH_KEY_NAME ${SSH_KEY_NAME} already exist"
-    echo "[WARNING] Retrieing ${SSH_KEY_NAME} from Parameter Store"
+    echo "[WARNING] Retrieving ${SSH_KEY_NAME} from Parameter Store"
     KEY_PAIR_ID=`aws ec2 describe-key-pairs --query KeyPairs[0].KeyPairId \
     --filters Name=key-name,Values=${SSH_KEY_NAME} \
     --output text \
     --region ${AWS_REGION}`
 
-    KEY_PAIR=`aws ssm get-parameter --name /ec2/keypair/${KEY_PAIR_ID} \
+    chmod 700 ~/.ssh/${SSH_KEY_NAME}
+    aws ssm get-parameter --name /ec2/keypair/${KEY_PAIR_ID} \
+        --with-decryption \
         --query Parameter.Value \
         --output text \
-        --region ${AWS_REGION}`
-
-    chmod 700 ~/.ssh/${SSH_KEY_NAME}
-    echo ${KEY_PAIR} > ~/.ssh/${SSH_KEY_NAME}
+        --region ${AWS_REGION} \
+        > ~/.ssh/${SSH_KEY_NAME}
     chmod 400 ~/.ssh/${SSH_KEY_NAME}
 fi
 
@@ -107,19 +109,22 @@ else
 fi
 
 
+export SUBNET_ID_HEADNODE=`echo ${SUBNET_ID} | awk '{print $1}'`
+
 echo "[INFO] Create AWS ParallelCluster configuration file for Barracuda Cluster"
 # Change the cluster configuration file
 PARALLELCLUSTER_CONFIG="${PARENT_PATH}/../../config/barracuda-cluster.yaml"
 
 yq -i '.Region = strenv(AWS_REGION)' ${PARALLELCLUSTER_CONFIG}
 yq -i '.HeadNode.Ssh.KeyName = strenv(SSH_KEY_NAME)' ${PARALLELCLUSTER_CONFIG}
-yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID)' ${PARALLELCLUSTER_CONFIG}
+yq -i '.HeadNode.Networking.SubnetId = strenv(SUBNET_ID_HEADNODE)' ${PARALLELCLUSTER_CONFIG}
 
 it=0
 for i in $SUBNET_ID
 do
     export TMP_SUB=${i}
-    yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[${it}] = strenv(TMP_SUB)' ${PARALLELCLUSTER_CONFIG}
+    export TMP_IT=${it}
+    yq -i '.Scheduling.SlurmQueues[0].Networking.SubnetIds[strenv(TMP_IT)] = strenv(TMP_SUB)' ${PARALLELCLUSTER_CONFIG}
    it=$(( $it + 1 ))
 done
 

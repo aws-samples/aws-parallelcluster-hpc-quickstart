@@ -46,21 +46,11 @@ Scheduling:
             Throughput: 125
 SharedStorage:
   - MountDir: /shared
-    Name: myebs
+    Name: shared
     StorageType: Ebs
     EbsSettings:
       VolumeType: gp3
-      Iops: 1000
-      Size: 40
-      Encrypted: true
-      Throughput: 125
-      DeletionPolicy: Delete
-  - MountDir: /home
-    Name: myebs
-    StorageType: Ebs
-    EbsSettings:
-      VolumeType: gp3
-      Iops: 1000
+      Iops: 3000
       Size: 40
       Encrypted: true
       Throughput: 125
