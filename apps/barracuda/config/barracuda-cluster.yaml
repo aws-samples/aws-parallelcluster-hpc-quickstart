@@ -1,0 +1,57 @@
+Image:
+  Os: alinux2
+HeadNode:
+  InstanceType: c5.2xlarge
+  Networking:
+    SubnetId: {SUBNET_ID}
+  Ssh:
+    KeyName: {SSH_KEY_NAME}
+  Dcv:
+    Enabled: true
+Scheduling:
+  Scheduler: slurm
+  SlurmSettings:
+    QueueUpdateStrategy: DRAIN
+  SlurmQueues:
+    - Name: gpu-od-queue
+      ComputeResources:
+        - Name: p3
+          Instances:
+            - InstanceType: p3.2xlarge
+          MinCount: 0
+          MaxCount: 4
+          DisableSimultaneousMultithreading: true
+        - Name: p4d
+          Instances:
+            - InstanceType: p4d.24xlarge
+          MinCount: 0
+          MaxCount: 4
+          DisableSimultaneousMultithreading: true
+        - Name: p4de
+          Instances:
+            - InstanceType: p4de.24xlarge
+          MinCount: 0
+          MaxCount: 4
+          DisableSimultaneousMultithreading: true
+      Networking:
+        SubnetIds:
+          - {SUBNET_ID}
+      ComputeSettings:
+        LocalStorage:
+          RootVolume:
+            Size: 100
+            Encrypted: true
+            VolumeType: gp3
+            Iops: 3000
+            Throughput: 125
+SharedStorage:
+  - MountDir: /shared
+    Name: shared
+    StorageType: Ebs
+    EbsSettings:
+      VolumeType: gp3
+      Iops: 3000
+      Size: 300
+      Encrypted: true
+      Throughput: 125
+      DeletionPolicy: Delete
