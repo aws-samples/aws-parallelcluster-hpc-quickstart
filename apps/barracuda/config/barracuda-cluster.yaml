@@ -1,7 +1,7 @@
 Image:
   Os: alinux2
 HeadNode:
-  InstanceType: g4dn.xlarge
+  InstanceType: c5.2xlarge
   Networking:
     SubnetId: {SUBNET_ID}
   Ssh:
@@ -51,7 +51,7 @@ SharedStorage:
     EbsSettings:
       VolumeType: gp3
       Iops: 3000
-      Size: 40
+      Size: 300
       Encrypted: true
       Throughput: 125
       DeletionPolicy: Delete

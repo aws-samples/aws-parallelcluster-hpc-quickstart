@@ -1,9 +1,11 @@
 # Barracuda on AWS ParallelCluster
 
-Barracuda on AWS ParallelCluster provides steps and code samples to build and run Barracuda on AWS using [AWS ParallelCluster](<https://docs.aws.amazon.com/parallelcluster/>).
-It is targeted Nvidia GPU instances.
+Barracuda on AWS ParallelCluster provides steps and code samples to build and run Barracuda Virtual Reactor on AWS using [AWS ParallelCluster](<https://docs.aws.amazon.com/parallelcluster/>).
 
 ## Barracuda On AWS
+
+Barracuda Virtual Reactor simulates the 3D, transient behavior in fluid-particle systems including the multiphase hydrodynamics, heat balance and chemical reactions.
+It is a product from CPFD Software, visit their [webpage](https://cpfd-software.com/) for more information.
 
 ### Architecture
 
@@ -11,35 +13,24 @@ It is targeted Nvidia GPU instances.
 
 ## Deploying Barracuda on AWS
 
-### AWS Cloud9 Environment
+### AWS CloudShell
 
-[AWS Cloud9](<https://aws.amazon.com/cloud9/>) is a cloud-based integrated development environment (IDE) that lets you write, run, and debug your code with just a browser.
+[AWS CloudShell](<https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html>) is a browser-based, pre-authenticated shell that you can launch directly from the AWS Management Console.
+You can run AWS CLI commands against AWS services using your preferred shell, such as Bash, PowerShell, or Z shell.
+And, you can do this without needing to download or install command line tools.
 
-AWS Cloud9 contains a collection of tools that let you code, build, run, test, debug, and release software in the cloud using your internet browser. The IDE offers support for python, pip, AWS CLI, and provides easy access to AWS resources through Identity and Access Management (IAM) user credentials. The IDE includes a terminal with sudo privileges to the managed instance that is hosting your development environment. This makes it easy for you to quickly run commands and directly access AWS services.
+You can launch AWS CloudShell from the AWS Management Console, and the AWS credentials that you used to sign in to the console are automatically available in a new shell session.
+This pre-authentication of AWS CloudShell users allows you to skip configuring credentials when interacting with AWS services using AWS CLI version 2.
+The AWS CLI is pre-installed on the shell's compute environment.
 
-#### Create an AWS Cloud9 environment:
+[Launch AWS CloudShell](<https://console.aws.amazon.com/cloudshell/home>)
 
-The link below will create an AWS Cloud9 environment from which you will be able to create your cluster.
-
-[![Launch Stack](<https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg>)](<https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/template?stackName=hpcsolutions-cloud9&templateURL=https://awsome-hpc.s3.amazonaws.com/cf_hpc_solutions_cloud9.yaml>)
-
-1. Open the [AWS Cloud9 console](<https://console.aws.amazon.com/cloud9>).
-1. Select **MyCloud9Env**.
-1. Choose **Open IDE**.
-
-#### Disable AWS managed temporary credentials:
-
-1. Once the Cloud9 environment is created.
-1. Choose the **gear icon** in the top right to open the Prefences tab.
-1. In the **Preferences** tab, choose **AWS SETTINGS**.
-1. Turn off the **AWS managed temporary credentials**.
-1. Close the **Preferences** tab.
 
 ### Prerequisites
 
-Let start by downloading the Barracuda repository containing the Infrastructure as Code on your **Cloud9 instance**.
+Let start by downloading the Barracuda repository containing the Infrastructure as Code on your **AWS CloudShell**.
 
-On the **Cloud9 instance terminal**, run the script below to install the prerequisited software:
+On the **AWS CloudShell**, run the script below to install the prerequisited software:
 
 ```bash
 wget https://github.com/aws-samples/awsome-hpc/archive/refs/heads/main.tar.gz
@@ -51,10 +42,9 @@ bash ./scripts/setup/install_prerequisites.sh
 
 The script will install the following on the Cloud9 instance:
 
-- [Python3 and pip](<https://pip.pypa.io/en/latest/installing/>).
-- [Packer version 1.6.0 and above](<https://learn.hashicorp.com/tutorials/packer/getting-started-install?in=packer/getting-started>).
 - [AWS CLI version 2](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>).
-- [Session Manager plugin](<https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html>).
+- [jq](<https://stedolan.github.io/jq/>).
+- [yq](<https://github.com/mikefarah/yq>).
 
 ### Install AWS ParallelCluster
 
@@ -91,6 +81,7 @@ Create the Barracuda Cluster
 
 ```bash
 CLUSTER_NAME="barracuda-cluster"
+echo "export CLUSTER_NAME=${CLUSTER_NAME}" >> ~/.bashrc
 pcluster create-cluster -n ${CLUSTER_NAME} -c config/barracuda-cluster.yaml --region ${AWS_REGION}
 ```
 
@@ -113,34 +104,29 @@ tar -xvzf /shared/barracuda_virtual_reactor-22.1.0-Linux.tar.gz -C /shared
 Install Barracuda
 ```bash
 /shared/barracuda_virtual_reactor-22.1.0-Linux/barracuda_virtual_reactor-22.1.0-Linux.run install --default-answer --accept-licenses --confirm-command --root /shared/Barracuda/22.1.0
+echo "export PATH=/shared/Barracuda/22.1.0/bin:$PATH" >> ~/.bashrc
 ```
 
 ## Run Barracuda
 
 In this section, you will go through the steps to run test case(s) provided by Barracuda on AWS ParallelCluster.
 
-Once you are connected to the Barracuda cluster, you should navigate to the `/fsx` directory.
-Here are the steps:
-
 ### Gasifier
 
 In this section, you will learn how to run Barracuda on a Gasifier test case.
 
-#### Run simpleFoam
+#### Setup
 
-Download Sample case
+Download Sample case.
 ```bash
-wget -P /fsx https://cpfd-software.com/wp-content/uploads/2023/02/barracuda_sample_case.zip
+wget -P /shared https://cpfd-software.com/wp-content/uploads/2023/02/barracuda_sample_case.zip
 ```
 
-Extract the sample case archive
-```bash
-unzip /fsx/barracuda_sample_case.zip -d /fsx
-```
+Add your license file in `/shared/ls.rlmcloud.com.lic`
 
-Submission
+Create submission script.
 ```bash
-cat > sbatch-barracuda-gasifier.sh << EOF
+cat > barracuda-gasifier-sub.sh << EOF
 #!/bin/bash
 
 #SBATCH --job-name=barracuda-gasifier
@@ -148,25 +134,43 @@ cat > sbatch-barracuda-gasifier.sh << EOF
 #SBATCH --error=%x_%j.err
 #SBATCH --partition=gpu-od-queue
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12
-#SBATCH --gres=gpu:1
+#SBATCH --gpus=v100:1
+#SBATCH --constraint=p3
 
+# Set WORK_DIR as scratch if local storage exist.
+# Otherwise use tmp
+export WORK_DIR=/scratch/\$SLURM_JOB_ID
 
-export cpfd_LICENSE="/shared/AWS-ls58.rlmcloud.com.lic"
+if [ ! -d /scratch ]; then
+    export WORK_DIR=/tmp/\$SLURM_JOB_ID
+fi
+
+echo \$WORK_DIR
+unzip -j /shared/barracuda_sample_case.zip -d \${WORK_DIR}
+cd \${WORK_DIR}
+
+export cpfd_LICENSE="/shared/ls.rlmcloud.com.lic"
 /shared/Barracuda/22.1.0/bin/cpfd.x -ow -cc -ct -cbc -cic -qmdp -qll -qfe -gpu -d0 -fallback quit gasifier.prj
+
+tar -czf /shared/barracuda-gasifier-results.tar.gz \${WORK_DIR}
 EOF
 ```
 
-The job should complete in ~2 hours with the output and log files located in the `/fsx` directory.
+#### Submit test case to Slurm
 
-#### Visualize Motorbike Results
-
-Once the simulation is completed, you can visualize the results using [Paraview](https://www.paraview.org)
-
-Download and extract Paraview archive
 ```bash
-curl -o ~/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Linux&downloadFile=ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz" && \
-tar -xvzf ~/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64.tar.gz
+sbatch barracuda-gasifier-sub.sh << EOF
+```
+
+The job should complete in ~4 hours on one `p3.2xlarge` Amazon EC2 Instances.
+
+#### Visualize Gasifier results
+
+Once the simulation is completed, you can visualize the results.
+
+Extract the results archive
+```bash
+tar -xvzf /shared/barracuda-gasifier-results.tar.gz
 ```
 
 Let's exit the head node of AWS ParallelCluster to return to AWS Cloud9 environment.
@@ -182,15 +186,9 @@ pcluster dcv-connect -n ${CLUSTER_NAME} --key-path ~/.ssh/${SSH_KEY_NAME} --regi
 You should obtain a reponse like this.
 ![DCV link](<docs/images/dcv_connect.png>)
 
-Copy and Paste the https link to a new tab of your web brower. It will create a remote visualization session.
-Launch Paraview by navigating to `~/ParaView-5.10.1-MPI-Linux-Python3.9-x86_64/bin/paraview`
-
-Through Paraview, open the file at `/fsx/motorBikeDemo/postProcessing/cuttingPlane/50/yNormal.vtp`.
-Select the '+Y' option.
-![Paraview](<docs/images/paraview_y.png>)
-
-You'll get the view of the fluid flow on the motorbike.
-![Paraview](<docs/images/paraview_motorbike_4m.png>)
+Copy and Paste the https link to a new tab of your web brower.
+It will create a remote visualization session.
+Launch Barracuda by typing `barracuda` in the terminal.
 
 ## Cleanup your cluster
 
@@ -209,10 +207,3 @@ Delete remaining components of the Barracuda solution
 ```bash
 . ./scripts/cleanup/cleanup_solution_components.sh
 ```
-
-### Delete the AWS Cloud9 environment:
-
-1. Open the [AWS CloudFormation](<https://console.aws.amazon.com/cloudformation>).
-1. Select **hpcsolutions-cloud9**.
-1. Choose **Delete**.
-1. Choose **Delete** to confirm deletion.
