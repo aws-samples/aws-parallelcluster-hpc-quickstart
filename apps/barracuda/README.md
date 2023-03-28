@@ -124,7 +124,7 @@ wget -P /shared https://cpfd-software.com/wp-content/uploads/2023/02/barracuda_s
 
 Add your license file in `/shared/ls.rlmcloud.com.lic`
 
-Create submission script.
+Create submission script that will run the simulation on one **p3.2xlarge** Amazon EC2 instance using **NVIDIA V100 GPU**.
 ```bash
 cat > barracuda-gasifier-sub.sh << EOF
 #!/bin/bash
@@ -156,21 +156,27 @@ tar -czf /shared/barracuda-gasifier-results.tar.gz \${WORK_DIR}
 EOF
 ```
 
+You can also run on **p4d.24xlarge** or **p4de.24xlarge** Amazon EC2 instances by modifying the submission script above.
+As an example for p4de, you should replace `--gpus=v100:1` by `--gpus=a100:1` and `--constraint=p3` by `--constrant=p4de` to run **p4de.24xlarge** EC2 instance.
+
 #### Submit test case to Slurm
 
 ```bash
 sbatch barracuda-gasifier-sub.sh << EOF
 ```
-
 The job should complete in ~4 hours on one `p3.2xlarge` Amazon EC2 Instances.
 
 #### Visualize Gasifier results
 
 Once the simulation is completed, you can visualize the results.
-
 Extract the results archive
 ```bash
 tar -xvzf /shared/barracuda-gasifier-results.tar.gz
+```
+
+**Install** the `xdg-utils` package.
+```bash
+sudo yum install -y xdg-utils
 ```
 
 Let's exit the head node of AWS ParallelCluster to return to AWS Cloud9 environment.
@@ -178,17 +184,28 @@ Let's exit the head node of AWS ParallelCluster to return to AWS Cloud9 environm
 exit
 ```
 
-To visualize the results of the motorbike test case, you will create remote visualization session using [DCV](https://aws.amazon.com/hpc/dcv/)
+To visualize the results of the Gasifier test case, you will create remote visualization session using [DCV](https://aws.amazon.com/hpc/dcv/)
 ```bash
 pcluster dcv-connect -n ${CLUSTER_NAME} --key-path ~/.ssh/${SSH_KEY_NAME} --region ${AWS_REGION}
 ```
 
-You should obtain a reponse like this.
+You should obtain a response like this.
 ![DCV link](<docs/images/dcv_connect.png>)
 
 Copy and Paste the https link to a new tab of your web brower.
 It will create a remote visualization session.
-Launch Barracuda by typing `barracuda` in the terminal.
+
+**Open** a terminal.
+**Launch** Barracuda by typing `barracuda` in the terminal.
+
+**Open** the gasifier project file, `gasifier.prj`.
+![Barracuda Open](<docs/images/barracuda_open.png>)
+
+**Visualize** the results by selecting `Post-processing` > `View results`.
+![Barracuda Visualization](<docs/images/barracuda_viz.png>)
+
+You can now visualize at the results of the gasifier simulation.
+![Barracuda Results](<docs/images/barracuda_gasifier_results.png>)
 
 ## Cleanup your cluster
 
