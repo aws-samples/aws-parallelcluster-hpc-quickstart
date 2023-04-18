@@ -127,6 +127,7 @@ do
 
     make -j
     make install
+    make clean
 
     echo "Compiling GROMACS MPI code"
     cmake3 .. \
