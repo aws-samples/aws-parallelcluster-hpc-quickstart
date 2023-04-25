@@ -27,12 +27,12 @@ Scheduling:
           MinCount: 0
           MaxCount: 4
           DisableSimultaneousMultithreading: true
-        - Name: p4de
-          Instances:
-            - InstanceType: p4de.24xlarge
-          MinCount: 0
-          MaxCount: 4
-          DisableSimultaneousMultithreading: true
+        # - Name: p4de
+        #   Instances:
+        #     - InstanceType: p4de.24xlarge
+        #   MinCount: 0
+        #   MaxCount: 4
+        #   DisableSimultaneousMultithreading: true
       Networking:
         SubnetIds:
           - {SUBNET_ID}
