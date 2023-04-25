@@ -61,13 +61,6 @@ Install AWS ParallelCluster
 pip3 install aws-parallelcluster==3.4.1
 ```
 
-Set AWS Region
-The command below will query the metadata of the AWS Cloud9 instance to determine in which region it has been created.
-
-```bash
-export AWS_REGION=`curl --silent http://169.254.169.254/latest/meta-data/placement/region`
-```
-
 ### Deploy AWS ParallelCluster with Barracuda
 
 Create the AWS ParallelCluster Configuration file.

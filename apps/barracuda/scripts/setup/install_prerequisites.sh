@@ -26,6 +26,8 @@ echo "[INFO] Uninstalling AWS CLI version 1"
 
 sudo rm -rf /usr/local/aws
 sudo rm -f /usr/local/bin/aws
+sudo rm -f /usr/local/bin/aws_completer
+sudo rm -f /usr/local/aws-cli
 
 # Install AWS CLI v2
 echo "[INFO] Installing AWS CLI version 2"
