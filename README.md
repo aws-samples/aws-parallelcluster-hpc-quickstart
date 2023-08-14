@@ -9,6 +9,8 @@ You want to learn more about HPC on AWS ? You can visit [https://www.hpcworkshop
 <img src="docs/images/aws_hpc.png">
 </p>
 
+![](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiQmZKbG4vWmJVd0I1ZXMzUHd5QTk2QVBuNk96ejMwOUREamIrYjl0czNuSU03RkVWWmVhN0RBU2U4VFJvYWJlTXRjUi82aWEydkI4VlQxQW4waWlYeHNnPSIsIml2UGFyYW1ldGVyU3BlYyI6IkErRlFBVkNZY0RXRENlSG8iLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=main)
+
 ## Applications on AWS ParallelCluster
 
 The following quickstart are provided for the following applications:
