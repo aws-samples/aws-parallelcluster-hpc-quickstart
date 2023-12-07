@@ -48,7 +48,7 @@ if [[ -z ${SSH_KEY_EXIST} ]]; then
         --output json`
 
     KEY_PAIR=`echo $KEY_INFO | jq -r .KeyMaterial`
-    echo ${KEY_PAIR} > ~/.ssh/${SSH_KEY_NAME}
+    echo "${KEY_PAIR}" > ~/.ssh/${SSH_KEY_NAME}
     chmod 400 ~/.ssh/${SSH_KEY_NAME}
 
     KEY_PAIR_ID=`echo $KEY_INFO | jq -r .KeyPairId`
