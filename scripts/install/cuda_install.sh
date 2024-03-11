@@ -38,6 +38,10 @@ sudo yum versionlock delete nvidia-fabric-manager
 # Remove existing Nvidia Fabric Manager
 sudo yum erase -y nvidia-fabricmanager
 
+# Change nvidia dkms to use gcc10
+sudo mkdir -p /etc/dkms && echo "MAKE[0]=\"'make' -j2 module SYSSRC=\${kernel_source_dir} IGNORE_XEN_PRESENCE=1 IGNORE_PREEMPT_RT_PRESENCE=1 IGNORE_CC_MISMATCH=1 CC=/usr/bin/gcc10-gcc\"" | sudo tee /etc/dkms/nvidia.conf
+sudo mkdir -p /etc/dkms && echo "MAKE[0]=\"'make' -j2 module SYSSRC=\${kernel_source_dir} IGNORE_XEN_PRESENCE=1 IGNORE_PREEMPT_RT_PRESENCE=1 IGNORE_CC_MISMATCH=1 CC=/usr/bin/gcc10-gcc\"" | sudo tee /etc/dkms/nvidia-open.conf
+
 # Install Nvidia Driver and Fabric Manager
 sudo yum install -y nvidia-driver-branch-${CUDA_DRIVER_VERSION} nvidia-fabricmanager-${CUDA_DRIVER_VERSION}
 sudo systemctl enable nvidia-fabricmanager
